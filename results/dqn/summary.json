@@ -1,0 +1,379 @@
+{
+  "reference_57": {
+    "Double DQN": {
+      "mean_seconds": 5348.807,
+      "std_seconds": 90.194,
+      "ci95_seconds": 5.59,
+      "mean_pit_stops": 3.66,
+      "compliance_rate": 1.0,
+      "delta_vs_agent_seconds": 0.0,
+      "paired_ci95_seconds": 0.0
+    },
+    "Fixed stint": {
+      "mean_seconds": 5430.793,
+      "std_seconds": 80.986,
+      "ci95_seconds": 5.02,
+      "mean_pit_stops": 1.0,
+      "compliance_rate": 1.0,
+      "delta_vs_agent_seconds": 81.985,
+      "paired_ci95_seconds": 0.797
+    },
+    "Rule based": {
+      "mean_seconds": 5403.655,
+      "std_seconds": 99.06,
+      "ci95_seconds": 6.14,
+      "mean_pit_stops": 1.927,
+      "compliance_rate": 1.0,
+      "delta_vs_agent_seconds": 54.848,
+      "paired_ci95_seconds": 0.801
+    }
+  },
+  "laps_30": {
+    "Double DQN": {
+      "mean_seconds": 2781.492,
+      "std_seconds": 66.369,
+      "ci95_seconds": 4.114,
+      "mean_pit_stops": 1.282,
+      "compliance_rate": 1.0,
+      "delta_vs_agent_seconds": 0.0,
+      "paired_ci95_seconds": 0.0
+    },
+    "Fixed stint": {
+      "mean_seconds": 2782.638,
+      "std_seconds": 67.108,
+      "ci95_seconds": 4.159,
+      "mean_pit_stops": 1.0,
+      "compliance_rate": 1.0,
+      "delta_vs_agent_seconds": 1.146,
+      "paired_ci95_seconds": 0.23
+    },
+    "Rule based": {
+      "mean_seconds": 2785.776,
+      "std_seconds": 64.271,
+      "ci95_seconds": 3.984,
+      "mean_pit_stops": 1.0,
+      "compliance_rate": 1.0,
+      "delta_vs_agent_seconds": 4.284,
+      "paired_ci95_seconds": 0.309
+    }
+  },
+  "laps_53": {
+    "Double DQN": {
+      "mean_seconds": 4965.225,
+      "std_seconds": 86.415,
+      "ci95_seconds": 5.356,
+      "mean_pit_stops": 3.257,
+      "compliance_rate": 1.0,
+      "delta_vs_agent_seconds": 0.0,
+      "paired_ci95_seconds": 0.0
+    },
+    "Fixed stint": {
+      "mean_seconds": 5019.311,
+      "std_seconds": 79.773,
+      "ci95_seconds": 4.944,
+      "mean_pit_stops": 1.0,
+      "compliance_rate": 1.0,
+      "delta_vs_agent_seconds": 54.086,
+      "paired_ci95_seconds": 0.639
+    },
+    "Rule based": {
+      "mean_seconds": 5017.285,
+      "std_seconds": 83.222,
+      "ci95_seconds": 5.158,
+      "mean_pit_stops": 1.585,
+      "compliance_rate": 1.0,
+      "delta_vs_agent_seconds": 52.06,
+      "paired_ci95_seconds": 0.624
+    }
+  },
+  "laps_66": {
+    "Double DQN": {
+      "mean_seconds": 6212.54,
+      "std_seconds": 96.925,
+      "ci95_seconds": 6.007,
+      "mean_pit_stops": 4.519,
+      "compliance_rate": 1.0,
+      "delta_vs_agent_seconds": 0.0,
+      "paired_ci95_seconds": 0.0
+    },
+    "Fixed stint": {
+      "mean_seconds": 6377.582,
+      "std_seconds": 78.815,
+      "ci95_seconds": 4.885,
+      "mean_pit_stops": 1.0,
+      "compliance_rate": 1.0,
+      "delta_vs_agent_seconds": 165.041,
+      "paired_ci95_seconds": 1.419
+    },
+    "Rule based": {
+      "mean_seconds": 6261.493,
+      "std_seconds": 104.934,
+      "ci95_seconds": 6.504,
+      "mean_pit_stops": 2.0,
+      "compliance_rate": 1.0,
+      "delta_vs_agent_seconds": 48.952,
+      "paired_ci95_seconds": 0.755
+    }
+  },
+  "laps_80": {
+    "Double DQN": {
+      "mean_seconds": 7567.028,
+      "std_seconds": 104.298,
+      "ci95_seconds": 6.464,
+      "mean_pit_stops": 5.732,
+      "compliance_rate": 1.0,
+      "delta_vs_agent_seconds": 0.0,
+      "paired_ci95_seconds": 0.0
+    },
+    "Fixed stint": {
+      "mean_seconds": 7955.628,
+      "std_seconds": 67.848,
+      "ci95_seconds": 4.205,
+      "mean_pit_stops": 1.0,
+      "compliance_rate": 1.0,
+      "delta_vs_agent_seconds": 388.6,
+      "paired_ci95_seconds": 2.81
+    },
+    "Rule based": {
+      "mean_seconds": 7637.85,
+      "std_seconds": 117.787,
+      "ci95_seconds": 7.301,
+      "mean_pit_stops": 2.91,
+      "compliance_rate": 1.0,
+      "delta_vs_agent_seconds": 70.822,
+      "paired_ci95_seconds": 1.154
+    }
+  },
+  "laps_90": {
+    "Double DQN": {
+      "mean_seconds": 8537.555,
+      "std_seconds": 112.018,
+      "ci95_seconds": 6.943,
+      "mean_pit_stops": 6.668,
+      "compliance_rate": 1.0,
+      "delta_vs_agent_seconds": 0.0,
+      "paired_ci95_seconds": 0.0
+    },
+    "Fixed stint": {
+      "mean_seconds": 9186.802,
+      "std_seconds": 55.111,
+      "ci95_seconds": 3.416,
+      "mean_pit_stops": 1.0,
+      "compliance_rate": 1.0,
+      "delta_vs_agent_seconds": 649.247,
+      "paired_ci95_seconds": 4.575
+    },
+    "Rule based": {
+      "mean_seconds": 8606.188,
+      "std_seconds": 122.486,
+      "ci95_seconds": 7.592,
+      "mean_pit_stops": 3.0,
+      "compliance_rate": 1.0,
+      "delta_vs_agent_seconds": 68.633,
+      "paired_ci95_seconds": 0.948
+    }
+  },
+  "wear_low": {
+    "Double DQN": {
+      "mean_seconds": 5321.694,
+      "std_seconds": 91.323,
+      "ci95_seconds": 5.66,
+      "mean_pit_stops": 3.068,
+      "compliance_rate": 1.0,
+      "delta_vs_agent_seconds": 0.0,
+      "paired_ci95_seconds": 0.0
+    },
+    "Fixed stint": {
+      "mean_seconds": 5345.823,
+      "std_seconds": 90.633,
+      "ci95_seconds": 5.618,
+      "mean_pit_stops": 1.0,
+      "compliance_rate": 1.0,
+      "delta_vs_agent_seconds": 24.129,
+      "paired_ci95_seconds": 0.411
+    },
+    "Rule based": {
+      "mean_seconds": 5357.726,
+      "std_seconds": 95.165,
+      "ci95_seconds": 5.898,
+      "mean_pit_stops": 1.0,
+      "compliance_rate": 1.0,
+      "delta_vs_agent_seconds": 36.032,
+      "paired_ci95_seconds": 0.497
+    }
+  },
+  "wear_high": {
+    "Double DQN": {
+      "mean_seconds": 5373.53,
+      "std_seconds": 87.642,
+      "ci95_seconds": 5.432,
+      "mean_pit_stops": 4.448,
+      "compliance_rate": 1.0,
+      "delta_vs_agent_seconds": 0.0,
+      "paired_ci95_seconds": 0.0
+    },
+    "Fixed stint": {
+      "mean_seconds": 5574.637,
+      "std_seconds": 64.994,
+      "ci95_seconds": 4.028,
+      "mean_pit_stops": 1.0,
+      "compliance_rate": 1.0,
+      "delta_vs_agent_seconds": 201.107,
+      "paired_ci95_seconds": 1.851
+    },
+    "Rule based": {
+      "mean_seconds": 5414.43,
+      "std_seconds": 89.321,
+      "ci95_seconds": 5.536,
+      "mean_pit_stops": 2.435,
+      "compliance_rate": 1.0,
+      "delta_vs_agent_seconds": 40.9,
+      "paired_ci95_seconds": 0.705
+    }
+  },
+  "pit_cheap": {
+    "Double DQN": {
+      "mean_seconds": 5322.172,
+      "std_seconds": 91.71,
+      "ci95_seconds": 5.684,
+      "mean_pit_stops": 6.386,
+      "compliance_rate": 1.0,
+      "delta_vs_agent_seconds": 0.0,
+      "paired_ci95_seconds": 0.0
+    },
+    "Fixed stint": {
+      "mean_seconds": 5421.283,
+      "std_seconds": 81.331,
+      "ci95_seconds": 5.041,
+      "mean_pit_stops": 1.0,
+      "compliance_rate": 1.0,
+      "delta_vs_agent_seconds": 99.111,
+      "paired_ci95_seconds": 0.843
+    },
+    "Rule based": {
+      "mean_seconds": 5384.813,
+      "std_seconds": 100.761,
+      "ci95_seconds": 6.245,
+      "mean_pit_stops": 1.927,
+      "compliance_rate": 1.0,
+      "delta_vs_agent_seconds": 62.64,
+      "paired_ci95_seconds": 0.751
+    }
+  },
+  "pit_expensive": {
+    "Double DQN": {
+      "mean_seconds": 5377.215,
+      "std_seconds": 84.511,
+      "ci95_seconds": 5.238,
+      "mean_pit_stops": 2.552,
+      "compliance_rate": 1.0,
+      "delta_vs_agent_seconds": 0.0,
+      "paired_ci95_seconds": 0.0
+    },
+    "Fixed stint": {
+      "mean_seconds": 5440.302,
+      "std_seconds": 80.663,
+      "ci95_seconds": 5.0,
+      "mean_pit_stops": 1.0,
+      "compliance_rate": 1.0,
+      "delta_vs_agent_seconds": 63.088,
+      "paired_ci95_seconds": 0.812
+    },
+    "Rule based": {
+      "mean_seconds": 5422.498,
+      "std_seconds": 97.42,
+      "ci95_seconds": 6.038,
+      "mean_pit_stops": 1.927,
+      "compliance_rate": 1.0,
+      "delta_vs_agent_seconds": 45.283,
+      "paired_ci95_seconds": 1.276
+    }
+  },
+  "no_safety_cars": {
+    "Double DQN": {
+      "mean_seconds": 5231.757,
+      "std_seconds": 1.857,
+      "ci95_seconds": 0.115,
+      "mean_pit_stops": 3.0,
+      "compliance_rate": 1.0,
+      "delta_vs_agent_seconds": 0.0,
+      "paired_ci95_seconds": 0.0
+    },
+    "Fixed stint": {
+      "mean_seconds": 5321.241,
+      "std_seconds": 2.925,
+      "ci95_seconds": 0.181,
+      "mean_pit_stops": 1.0,
+      "compliance_rate": 1.0,
+      "delta_vs_agent_seconds": 89.483,
+      "paired_ci95_seconds": 0.12
+    },
+    "Rule based": {
+      "mean_seconds": 5265.081,
+      "std_seconds": 2.117,
+      "ci95_seconds": 0.131,
+      "mean_pit_stops": 2.0,
+      "compliance_rate": 1.0,
+      "delta_vs_agent_seconds": 33.324,
+      "paired_ci95_seconds": 0.093
+    }
+  },
+  "more_safety_cars": {
+    "Double DQN": {
+      "mean_seconds": 5453.662,
+      "std_seconds": 109.959,
+      "ci95_seconds": 6.815,
+      "mean_pit_stops": 3.919,
+      "compliance_rate": 1.0,
+      "delta_vs_agent_seconds": 0.0,
+      "paired_ci95_seconds": 0.0
+    },
+    "Fixed stint": {
+      "mean_seconds": 5524.078,
+      "std_seconds": 102.85,
+      "ci95_seconds": 6.375,
+      "mean_pit_stops": 1.0,
+      "compliance_rate": 1.0,
+      "delta_vs_agent_seconds": 70.416,
+      "paired_ci95_seconds": 0.959
+    },
+    "Rule based": {
+      "mean_seconds": 5512.317,
+      "std_seconds": 114.712,
+      "ci95_seconds": 7.11,
+      "mean_pit_stops": 1.647,
+      "compliance_rate": 1.0,
+      "delta_vs_agent_seconds": 58.655,
+      "paired_ci95_seconds": 1.067
+    }
+  },
+  "held_out_combination": {
+    "Double DQN": {
+      "mean_seconds": 5939.195,
+      "std_seconds": 108.261,
+      "ci95_seconds": 6.71,
+      "mean_pit_stops": 3.997,
+      "compliance_rate": 1.0,
+      "delta_vs_agent_seconds": 0.0,
+      "paired_ci95_seconds": 0.0
+    },
+    "Fixed stint": {
+      "mean_seconds": 6193.485,
+      "std_seconds": 74.994,
+      "ci95_seconds": 4.648,
+      "mean_pit_stops": 1.0,
+      "compliance_rate": 1.0,
+      "delta_vs_agent_seconds": 254.29,
+      "paired_ci95_seconds": 2.693
+    },
+    "Rule based": {
+      "mean_seconds": 5992.642,
+      "std_seconds": 113.282,
+      "ci95_seconds": 7.021,
+      "mean_pit_stops": 2.571,
+      "compliance_rate": 1.0,
+      "delta_vs_agent_seconds": 53.447,
+      "paired_ci95_seconds": 1.234
+    }
+  }
+}

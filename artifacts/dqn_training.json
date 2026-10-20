@@ -1,0 +1,191 @@
+{
+  "algorithm": "double_dqn",
+  "config": {
+    "observation_n": 27,
+    "action_n": 4,
+    "hidden_n": 128,
+    "learning_rate": 0.0003,
+    "gamma": 1.0,
+    "batch_size": 256,
+    "replay_capacity": 100000,
+    "warmup": 4096,
+    "target_interval": 250,
+    "gradient_clip": 10.0
+  },
+  "training_episodes": 30000,
+  "seed": 7,
+  "transitions": 1633334,
+  "updates": 101865,
+  "elapsed_seconds": 92.21974754199618,
+  "validations": [
+    {
+      "completed_episodes": 2000,
+      "transitions": 109520,
+      "updates": 6590,
+      "epsilon": 0.7648270629257614,
+      "elapsed_seconds": 5.745752041984815,
+      "mean_seconds_per_lap": 93.90037278148628,
+      "compliance_rate": 1.0,
+      "episodes": 64,
+      "selected": true
+    },
+    {
+      "completed_episodes": 4000,
+      "transitions": 217312,
+      "updates": 13327,
+      "epsilon": 0.584881986652644,
+      "elapsed_seconds": 11.472455125011038,
+      "mean_seconds_per_lap": 93.72201583101833,
+      "compliance_rate": 1.0,
+      "episodes": 64,
+      "selected": true
+    },
+    {
+      "completed_episodes": 6001,
+      "transitions": 327008,
+      "updates": 20183,
+      "epsilon": 0.44727357973203485,
+      "elapsed_seconds": 17.57972758397227,
+      "mean_seconds_per_lap": 94.04367765425705,
+      "compliance_rate": 0.5625,
+      "episodes": 64,
+      "selected": false
+    },
+    {
+      "completed_episodes": 8001,
+      "transitions": 436080,
+      "updates": 27000,
+      "epsilon": 0.3419951893353394,
+      "elapsed_seconds": 23.863452708988916,
+      "mean_seconds_per_lap": 94.31116265773692,
+      "compliance_rate": 0.125,
+      "episodes": 64,
+      "selected": false
+    },
+    {
+      "completed_episodes": 10001,
+      "transitions": 544880,
+      "updates": 33800,
+      "epsilon": 0.2615320972023661,
+      "elapsed_seconds": 30.38143908395432,
+      "mean_seconds_per_lap": 94.07573683472707,
+      "compliance_rate": 0.421875,
+      "episodes": 64,
+      "selected": false
+    },
+    {
+      "completed_episodes": 12001,
+      "transitions": 654944,
+      "updates": 40679,
+      "epsilon": 0.2,
+      "elapsed_seconds": 36.45905970898457,
+      "mean_seconds_per_lap": 93.82013872454709,
+      "compliance_rate": 0.78125,
+      "episodes": 64,
+      "selected": false
+    },
+    {
+      "completed_episodes": 14001,
+      "transitions": 763472,
+      "updates": 47462,
+      "epsilon": 0.152944898266346,
+      "elapsed_seconds": 43.23146899999119,
+      "mean_seconds_per_lap": 93.8442528238686,
+      "compliance_rate": 0.75,
+      "episodes": 64,
+      "selected": false
+    },
+    {
+      "completed_episodes": 16001,
+      "transitions": 870544,
+      "updates": 54154,
+      "epsilon": 0.11696070952851466,
+      "elapsed_seconds": 49.44301195896696,
+      "mean_seconds_per_lap": 93.62702820695316,
+      "compliance_rate": 1.0,
+      "episodes": 64,
+      "selected": true
+    },
+    {
+      "completed_episodes": 18001,
+      "transitions": 980640,
+      "updates": 61035,
+      "epsilon": 0.08944271909999159,
+      "elapsed_seconds": 55.71883937501116,
+      "mean_seconds_per_lap": 93.6227829317548,
+      "compliance_rate": 1.0,
+      "episodes": 64,
+      "selected": true
+    },
+    {
+      "completed_episodes": 20001,
+      "transitions": 1089072,
+      "updates": 67812,
+      "epsilon": 0.06839903786706787,
+      "elapsed_seconds": 61.740411083970685,
+      "mean_seconds_per_lap": 93.62084513490828,
+      "compliance_rate": 1.0,
+      "episodes": 64,
+      "selected": true
+    },
+    {
+      "completed_episodes": 22001,
+      "transitions": 1198992,
+      "updates": 74682,
+      "epsilon": 0.052306419440473234,
+      "elapsed_seconds": 67.84064983396092,
+      "mean_seconds_per_lap": 93.58938671578312,
+      "compliance_rate": 1.0,
+      "episodes": 64,
+      "selected": true
+    },
+    {
+      "completed_episodes": 24001,
+      "transitions": 1307024,
+      "updates": 81434,
+      "epsilon": 0.04,
+      "elapsed_seconds": 73.82733762497082,
+      "mean_seconds_per_lap": 93.59222129327146,
+      "compliance_rate": 1.0,
+      "episodes": 64,
+      "selected": false
+    },
+    {
+      "completed_episodes": 26001,
+      "transitions": 1415712,
+      "updates": 88227,
+      "epsilon": 0.04,
+      "elapsed_seconds": 79.98721645900514,
+      "mean_seconds_per_lap": 93.57151377520698,
+      "compliance_rate": 1.0,
+      "episodes": 64,
+      "selected": true
+    },
+    {
+      "completed_episodes": 28001,
+      "transitions": 1525200,
+      "updates": 95070,
+      "epsilon": 0.04,
+      "elapsed_seconds": 86.01103420899017,
+      "mean_seconds_per_lap": 93.59186688610396,
+      "compliance_rate": 1.0,
+      "episodes": 64,
+      "selected": false
+    },
+    {
+      "completed_episodes": 30000,
+      "transitions": 1633334,
+      "updates": 101865,
+      "epsilon": 0.04,
+      "elapsed_seconds": 92.21156341698952,
+      "mean_seconds_per_lap": 93.58022942119266,
+      "compliance_rate": 1.0,
+      "episodes": 64,
+      "selected": false
+    }
+  ],
+  "checkpoint": "artifacts/dqn.pt",
+  "trace": "artifacts/dqn_training.npz",
+  "selection_uses_test_data": false,
+  "execution": "single process, one Torch CPU thread, no background workers"
+}

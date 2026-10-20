@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pitstoprl"
+version = "2.0.0"
+description = "Contextual Double DQN for variable-length stochastic pit strategy"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+authors = [{name = "Harshit Deora"}]
+dependencies = ["numpy>=1.24", "matplotlib>=3.7", "torch>=2.2"]
+
+[project.optional-dependencies]
+dev = ["pytest>=7.4", "ruff>=0.6"]
+
+[project.scripts]
+pitstoprl-train = "pitstoprl.train:main"
+pitstoprl-evaluate = "pitstoprl.evaluate:main"
+pitstoprl-demo = "pitstoprl.demo:main"
+
+[tool.setuptools.packages.find]
+include = ["pitstoprl*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
