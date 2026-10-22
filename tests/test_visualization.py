@@ -12,7 +12,7 @@ import pytest
 import torch
 
 from pitstoprl.dqn import DQNAgent
-from pitstoprl.env import RaceConfig, RaceEnv
+from pitstoprl.env import RaceConfig, RaceEnv, action_mask
 from pitstoprl.policies import FixedStintPolicy, RuleBasedPolicy
 from pitstoprl.visualize import export_visualization
 
@@ -84,7 +84,9 @@ def test_javascript_hidden_activations_and_q_values_match_torch(exported_model):
                     expected_layers.append(tensor.numpy())
         for expected, calculated in zip(expected_layers, prediction["activations"]):
             np.testing.assert_allclose(calculated, expected, atol=2e-5, rtol=2e-5)
-        assert prediction["action"] == int(np.argmax(expected_layers[-1]))
+        allowed = action_mask(np.array(observation))
+        assert prediction["actionMask"] == allowed.tolist()
+        assert prediction["action"] == int(np.argmax(np.where(allowed, expected_layers[-1], -np.inf)))
 
 
 class RecordedRandom:
@@ -255,6 +257,7 @@ def test_custom_comparisons_use_paired_randomness_and_include_penalties(exported
             laps:race.records.length,time:race.time,
             summed:race.records.reduce((s,r)=>s+r.lapTime+r.penalty,0),
             penalty:race.records.reduce((s,r)=>s+r.penalty,0),changed:race.changed,
+            maxWear:Math.max(...race.records.map(r=>r.after.wear)),
             repeat:JSON.stringify(race.records)===JSON.stringify(repeat[name].records)
           }]))};
       });
@@ -270,3 +273,56 @@ def test_custom_comparisons_use_paired_randomness_and_include_penalties(exported
             assert strategy["time"] == pytest.approx(strategy["summed"], abs=1e-8)
             assert strategy["penalty"] == (0 if strategy["changed"] else 30)
             assert strategy["repeat"]
+            assert strategy["maxWear"] <= 1
+
+
+def test_browser_action_masks_match_python_near_wear_limit(exported_model):
+    model, _ = exported_model
+    observations = []
+    for multiplier in (0.7, 1.3, 25.0):
+        env = RaceEnv(RaceConfig.for_laps(66, wear_multiplier=multiplier))
+        for compound in range(3):
+            env.compound = compound
+            for wear in (0.0, 0.90, 0.98, 0.9999999):
+                env.wear = wear
+                for sc in (0, 2):
+                    env.safety_car_remaining = sc
+                    observations.append(env._observation().tolist())
+    script = """
+      const fs=require('node:fs'),E=require(process.argv[1]);
+      const d=JSON.parse(fs.readFileSync(0,'utf8'));
+      process.stdout.write(JSON.stringify(d.observations.map(o=>({mask:E.actionMask(o),
+        action:E.infer(d.model,o).action}))));
+    """
+    actual = node_run(script, {"model": model, "observations": observations})
+    for obs, result in zip(observations, actual, strict=True):
+        expected = action_mask(np.array(obs))
+        assert result["mask"] == expected.tolist()
+        assert expected[result["action"]]
+
+
+def test_browser_rejects_unsafe_actions_and_survives_maximum_wear(exported_model):
+    model, _ = exported_model
+    script = """
+      const fs=require('node:fs'),E=require(process.argv[1]);
+      const model=JSON.parse(fs.readFileSync(0,'utf8')); let draws=0;
+      const rng={normal:()=>{draws++;return 0},uniform:(a,b)=>{draws++;return b},
+        random:()=>{draws++;return 1}};
+      const race=new E.Race(model,{laps:300,wear_multiplier:1.3},8,rng);
+      race.wear=.98;
+      const before=JSON.stringify(race.state()); let rejected=false;
+      try {race.step(0)} catch(error) {rejected=error.message.includes('100% tyre wear')}
+      const unchanged=JSON.stringify(race.state())===before && draws===0;
+      const maxima=[];
+      for(const wear of [.7,1.3,3,25]) for(const policy of [null,E.fixedStintPolicy,E.wearBasedPolicy]) {
+        const r=new E.Race(model,{laps:300,wear_multiplier:wear},8,rng);
+        r.run(policy);
+        maxima.push(Math.max(...r.records.map(lap=>lap.after.wear)));
+      }
+      let impossible=false;
+      try {E.makeConfig({wear_multiplier:40})} catch {impossible=true}
+      process.stdout.write(JSON.stringify({rejected,unchanged,maxima,impossible}));
+    """
+    result = node_run(script, model)
+    assert result["rejected"] and result["unchanged"] and result["impossible"]
+    assert max(result["maxima"]) <= 1

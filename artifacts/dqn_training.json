@@ -1,4 +1,8 @@
 {
+  "environment_version": "wear_limit_v1",
+  "tyre_wear_limit": 1.0,
+  "max_training_tyre_wear": 0.997904196140151,
+  "wear_limit_violations": 0,
   "algorithm": "double_dqn",
   "config": {
     "observation_n": 27,
@@ -16,17 +20,19 @@
   "seed": 7,
   "transitions": 1633334,
   "updates": 101865,
-  "elapsed_seconds": 92.21974754199618,
+  "elapsed_seconds": 104.1737967079971,
   "validations": [
     {
       "completed_episodes": 2000,
       "transitions": 109520,
       "updates": 6590,
       "epsilon": 0.7648270629257614,
-      "elapsed_seconds": 5.745752041984815,
-      "mean_seconds_per_lap": 93.90037278148628,
+      "elapsed_seconds": 6.830778125033248,
+      "max_training_tyre_wear": 0.6755944626093174,
+      "mean_seconds_per_lap": 93.73566354838098,
       "compliance_rate": 1.0,
       "episodes": 64,
+      "max_tyre_wear": 0.680507262026016,
       "selected": true
     },
     {
@@ -34,10 +40,12 @@
       "transitions": 217312,
       "updates": 13327,
       "epsilon": 0.584881986652644,
-      "elapsed_seconds": 11.472455125011038,
-      "mean_seconds_per_lap": 93.72201583101833,
+      "elapsed_seconds": 13.683096583001316,
+      "max_training_tyre_wear": 0.6755944626093174,
+      "mean_seconds_per_lap": 93.72966133911342,
       "compliance_rate": 1.0,
       "episodes": 64,
+      "max_tyre_wear": 0.5861214127379971,
       "selected": true
     },
     {
@@ -45,10 +53,12 @@
       "transitions": 327008,
       "updates": 20183,
       "epsilon": 0.44727357973203485,
-      "elapsed_seconds": 17.57972758397227,
-      "mean_seconds_per_lap": 94.04367765425705,
-      "compliance_rate": 0.5625,
+      "elapsed_seconds": 20.637000166985672,
+      "max_training_tyre_wear": 0.7116510006865702,
+      "mean_seconds_per_lap": 93.7715157262774,
+      "compliance_rate": 0.9375,
       "episodes": 64,
+      "max_tyre_wear": 0.6142328654135594,
       "selected": false
     },
     {
@@ -56,10 +66,12 @@
       "transitions": 436080,
       "updates": 27000,
       "epsilon": 0.3419951893353394,
-      "elapsed_seconds": 23.863452708988916,
-      "mean_seconds_per_lap": 94.31116265773692,
-      "compliance_rate": 0.125,
+      "elapsed_seconds": 27.556878667033743,
+      "max_training_tyre_wear": 0.7116510006865702,
+      "mean_seconds_per_lap": 93.84045035074541,
+      "compliance_rate": 0.875,
       "episodes": 64,
+      "max_tyre_wear": 0.672818660708416,
       "selected": false
     },
     {
@@ -67,10 +79,12 @@
       "transitions": 544880,
       "updates": 33800,
       "epsilon": 0.2615320972023661,
-      "elapsed_seconds": 30.38143908395432,
-      "mean_seconds_per_lap": 94.07573683472707,
-      "compliance_rate": 0.421875,
+      "elapsed_seconds": 34.43923633301165,
+      "max_training_tyre_wear": 0.7499337438384237,
+      "mean_seconds_per_lap": 94.32981190668154,
+      "compliance_rate": 0.109375,
       "episodes": 64,
+      "max_tyre_wear": 0.7922729393954318,
       "selected": false
     },
     {
@@ -78,10 +92,12 @@
       "transitions": 654944,
       "updates": 40679,
       "epsilon": 0.2,
-      "elapsed_seconds": 36.45905970898457,
-      "mean_seconds_per_lap": 93.82013872454709,
-      "compliance_rate": 0.78125,
+      "elapsed_seconds": 41.41914937499678,
+      "max_training_tyre_wear": 0.9286686867757685,
+      "mean_seconds_per_lap": 94.31846311983429,
+      "compliance_rate": 0.0625,
       "episodes": 64,
+      "max_tyre_wear": 0.7906999576303458,
       "selected": false
     },
     {
@@ -89,10 +105,12 @@
       "transitions": 763472,
       "updates": 47462,
       "epsilon": 0.152944898266346,
-      "elapsed_seconds": 43.23146899999119,
-      "mean_seconds_per_lap": 93.8442528238686,
-      "compliance_rate": 0.75,
+      "elapsed_seconds": 48.48717687500175,
+      "max_training_tyre_wear": 0.9418217583193522,
+      "mean_seconds_per_lap": 93.86630960375949,
+      "compliance_rate": 0.65625,
       "episodes": 64,
+      "max_tyre_wear": 0.8443332228514141,
       "selected": false
     },
     {
@@ -100,10 +118,12 @@
       "transitions": 870544,
       "updates": 54154,
       "epsilon": 0.11696070952851466,
-      "elapsed_seconds": 49.44301195896696,
-      "mean_seconds_per_lap": 93.62702820695316,
+      "elapsed_seconds": 55.34039541700622,
+      "max_training_tyre_wear": 0.9784369523018025,
+      "mean_seconds_per_lap": 93.58882775842278,
       "compliance_rate": 1.0,
       "episodes": 64,
+      "max_tyre_wear": 0.8912268533408303,
       "selected": true
     },
     {
@@ -111,10 +131,12 @@
       "transitions": 980640,
       "updates": 61035,
       "epsilon": 0.08944271909999159,
-      "elapsed_seconds": 55.71883937501116,
-      "mean_seconds_per_lap": 93.6227829317548,
+      "elapsed_seconds": 62.338806207990274,
+      "max_training_tyre_wear": 0.9856256161567488,
+      "mean_seconds_per_lap": 93.57118834157015,
       "compliance_rate": 1.0,
       "episodes": 64,
+      "max_tyre_wear": 0.9889278630304349,
       "selected": true
     },
     {
@@ -122,32 +144,38 @@
       "transitions": 1089072,
       "updates": 67812,
       "epsilon": 0.06839903786706787,
-      "elapsed_seconds": 61.740411083970685,
-      "mean_seconds_per_lap": 93.62084513490828,
+      "elapsed_seconds": 69.25923662498826,
+      "max_training_tyre_wear": 0.9856256161567488,
+      "mean_seconds_per_lap": 93.58110661005821,
       "compliance_rate": 1.0,
       "episodes": 64,
-      "selected": true
+      "max_tyre_wear": 0.8936450063093726,
+      "selected": false
     },
     {
       "completed_episodes": 22001,
       "transitions": 1198992,
       "updates": 74682,
       "epsilon": 0.052306419440473234,
-      "elapsed_seconds": 67.84064983396092,
-      "mean_seconds_per_lap": 93.58938671578312,
+      "elapsed_seconds": 76.36211383301998,
+      "max_training_tyre_wear": 0.9969822541357038,
+      "mean_seconds_per_lap": 93.57762728776768,
       "compliance_rate": 1.0,
       "episodes": 64,
-      "selected": true
+      "max_tyre_wear": 0.8936450063093726,
+      "selected": false
     },
     {
       "completed_episodes": 24001,
       "transitions": 1307024,
       "updates": 81434,
       "epsilon": 0.04,
-      "elapsed_seconds": 73.82733762497082,
-      "mean_seconds_per_lap": 93.59222129327146,
+      "elapsed_seconds": 83.26519258302869,
+      "max_training_tyre_wear": 0.9969822541357038,
+      "mean_seconds_per_lap": 93.59064849023515,
       "compliance_rate": 1.0,
       "episodes": 64,
+      "max_tyre_wear": 0.8936450063093726,
       "selected": false
     },
     {
@@ -155,21 +183,25 @@
       "transitions": 1415712,
       "updates": 88227,
       "epsilon": 0.04,
-      "elapsed_seconds": 79.98721645900514,
-      "mean_seconds_per_lap": 93.57151377520698,
+      "elapsed_seconds": 90.21090558299329,
+      "max_training_tyre_wear": 0.9969822541357038,
+      "mean_seconds_per_lap": 93.59005954310712,
       "compliance_rate": 1.0,
       "episodes": 64,
-      "selected": true
+      "max_tyre_wear": 0.8936450063093726,
+      "selected": false
     },
     {
       "completed_episodes": 28001,
       "transitions": 1525200,
       "updates": 95070,
       "epsilon": 0.04,
-      "elapsed_seconds": 86.01103420899017,
-      "mean_seconds_per_lap": 93.59186688610396,
+      "elapsed_seconds": 97.2088085830328,
+      "max_training_tyre_wear": 0.997904196140151,
+      "mean_seconds_per_lap": 93.58638177520551,
       "compliance_rate": 1.0,
       "episodes": 64,
+      "max_tyre_wear": 0.9240603525028043,
       "selected": false
     },
     {
@@ -177,11 +209,13 @@
       "transitions": 1633334,
       "updates": 101865,
       "epsilon": 0.04,
-      "elapsed_seconds": 92.21156341698952,
-      "mean_seconds_per_lap": 93.58022942119266,
+      "elapsed_seconds": 104.16417804203229,
+      "max_training_tyre_wear": 0.997904196140151,
+      "mean_seconds_per_lap": 93.55039344875945,
       "compliance_rate": 1.0,
       "episodes": 64,
-      "selected": false
+      "max_tyre_wear": 0.8515293770346798,
+      "selected": true
     }
   ],
   "checkpoint": "artifacts/dqn.pt",

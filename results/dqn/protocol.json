@@ -1,13 +1,24 @@
 {
+  "environment_version": "wear_limit_v1",
+  "tyre_wear_limit": 1.0,
+  "fixed_baseline": "medium-to-hard at 40% distance, plus tyre-safety stops before 100% wear",
   "episodes_per_scenario_per_policy": 1000,
+  "strategies": [
+    "Double DQN",
+    "Planned + safety",
+    "Rule based"
+  ],
   "test_seed_range": [
     2000000,
     2000999
   ],
-  "checkpoint_sha256": "1a1546889b2171b7d83426594025bd9acbf2528d5e6f4afc8d7b136fd92fc440",
+  "checkpoint_sha256": "8dfe999315cf2b57b33ca2543ac9592cc37e38156fae76d120592d9e6a73f27a",
   "checkpoint_metadata": {
+    "environment_version": "wear_limit_v1",
+    "tyre_wear_limit": 1.0,
+    "action_constraint": "worst-case next-lap wear <= 1 - 1e-6; masked exploration and Bellman targets",
     "training_episodes": 30000,
-    "completed_episodes": 26001,
+    "completed_episodes": 30000,
     "seed": 7,
     "training_seed_range": [
       7,
@@ -122,9 +133,10 @@
     },
     "selection": "lowest mean seconds/lap on fixed validation races",
     "validation": {
-      "mean_seconds_per_lap": 93.57151377520698,
+      "mean_seconds_per_lap": 93.55039344875945,
       "compliance_rate": 1.0,
-      "episodes": 64
+      "episodes": 64,
+      "max_tyre_wear": 0.8515293770346798
     },
     "env_count": 16,
     "validate_every": 2000,
@@ -370,10 +382,5 @@
     }
   },
   "paired_confidence_intervals": "normal approximation, marginal 95%; not multiplicity corrected",
-  "scope": "Synthetic simulator; no real F1 performance or universal transfer claim.",
-  "strategies": [
-    "Double DQN",
-    "Fixed stint",
-    "Rule based"
-  ]
+  "scope": "Synthetic simulator; no real F1 performance or universal transfer claim."
 }

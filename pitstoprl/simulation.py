@@ -22,5 +22,7 @@ def run_episode(env: RaceEnv, policy: Callable[[np.ndarray], int], seed: int) ->
         "reward": total_reward,
         "pit_stops": env.pit_count,
         "compliant": env.changed_compound,
+        "max_tyre_wear": max(row["wear"] for row in env.history),
+        "wear_limit_violations": sum(row["wear"] > env.wear_limit for row in env.history),
         "history": list(env.history),
     }

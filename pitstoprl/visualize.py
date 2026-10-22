@@ -27,6 +27,8 @@ def export_visualization(checkpoint: Path, output: Path) -> Path:
             {"weight": layer.weight.detach().tolist(), "bias": layer.bias.detach().tolist()}
         )
     model = {
+        "environment_version": RaceEnv.environment_version,
+        "tyre_wear_limit": RaceEnv.wear_limit,
         "checkpoint_sha256": hashlib.sha256(checkpoint.read_bytes()).hexdigest(),
         "observation_names": list(RaceEnv.OBSERVATION_NAMES),
         "metadata": agent.metadata,

@@ -32,7 +32,8 @@ def main() -> None:
     result = run_episode(RaceEnv(config), agent.act, args.seed)
     print(
         f"Laps: {args.laps} | race time: {result['race_time']:.2f} s | "
-        f"stops: {result['pit_stops']} | compound rule: {result['compliant']}"
+        f"stops: {result['pit_stops']} | compound rule: {result['compliant']} | "
+        f"maximum tyre wear: {result['max_tyre_wear']:.2%} (limit 100%)"
     )
     for row in result["history"]:
         if row["pitted"] or row["safety_car"]:

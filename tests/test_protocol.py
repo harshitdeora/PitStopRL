@@ -50,7 +50,7 @@ def test_evaluation_exports_paired_metrics_without_learning(tmp_path: Path, monk
         "pitstoprl.evaluate.benchmark_configs", lambda: {"reference_57": RaceConfig.for_laps(3)}
     )
     summary = evaluate(checkpoint, 2, TEST_SEED, tmp_path / "results")
-    assert set(summary["reference_57"]) == {"Double DQN", "Fixed stint", "Rule based"}
+    assert set(summary["reference_57"]) == {"Double DQN", "Planned + safety", "Rule based"}
     assert (tmp_path / "results/protocol.json").exists()
     assert (tmp_path / "results/evaluation.csv").exists()
     assert checkpoint.read_bytes() == original
@@ -64,6 +64,9 @@ def test_small_training_run_saves_selected_model_and_full_trace(tmp_path: Path):
     assert loaded.metadata["training_seed_range"] == [8, 10]
     assert loaded.metadata["validation_seed_range"][0] == 1_000_000
     assert result["selection_uses_test_data"] is False
+    assert result["environment_version"] == "wear_limit_v1"
+    assert result["max_training_tyre_wear"] <= 1
+    assert result["wear_limit_violations"] == 0
     with np.load(tmp_path / "tiny_training.npz") as trace:
         assert len(trace["rewards"]) == 3
         assert np.isfinite(trace["rewards"]).all()

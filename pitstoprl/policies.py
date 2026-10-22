@@ -4,19 +4,24 @@ from __future__ import annotations
 
 import numpy as np
 
-from .env import Action, Compound
+from .env import Action, Compound, action_mask
 
 
 class FixedStintPolicy:
-    """Evaluation-only medium-to-hard stop after 40% of the race."""
+    """Medium-to-hard at 40% distance, with additional tyre-safety stops."""
 
     def __call__(self, obs: np.ndarray) -> int:
-        changed = bool(obs[7] >= 0.5)
+        allowed = action_mask(obs)
+        current = Compound(round(float(obs[1]) * 2))
         total = round(float(obs[9]) * 100)
         remaining = round(float(obs[8]) * 100)
         trigger = min(max(int(total * 0.4), 0), total - 1)
-        should_pit = total - remaining >= trigger and not changed
-        return int(Action.PIT_HARD if should_pit else Action.STAY_OUT)
+        hard_phase = total - remaining >= trigger
+        target = Compound.HARD if hard_phase else Compound.MEDIUM
+        if (hard_phase and current != Compound.HARD) or not allowed[Action.STAY_OUT]:
+            preferred = int(target) + 1
+            return preferred if allowed[preferred] else int(Action.PIT_HARD)
+        return int(Action.STAY_OUT)
 
 
 class RuleBasedPolicy:
@@ -27,7 +32,8 @@ class RuleBasedPolicy:
         age = float(age_scaled) * 30
         remaining = round(float(obs[8]) * 100)
         current = Compound(round(float(compound_scaled) * 2))
-        should_pit = wear > 0.80
+        allowed = action_mask(obs)
+        should_pit = wear > np.float32(0.80) or not allowed[Action.STAY_OUT]
         if not should_pit and remaining < 14 and changed < 0.5 and age >= 10:
             should_pit = True
         if not should_pit:
@@ -40,4 +46,5 @@ class RuleBasedPolicy:
             target = Compound.HARD
         if target == current:
             target = Compound.HARD if current != Compound.HARD else Compound.MEDIUM
-        return int(target) + 1
+        preferred = int(target) + 1
+        return preferred if allowed[preferred] else int(Action.PIT_HARD)

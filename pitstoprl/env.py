@@ -12,6 +12,29 @@ from enum import IntEnum
 
 import numpy as np
 
+ENVIRONMENT_VERSION = "wear_limit_v1"
+WEAR_LIMIT = 1.0
+MAX_WEAR_NOISE = 1.07
+WEAR_GUARD = 1e-6
+
+
+def action_mask(observations: np.ndarray) -> np.ndarray:
+    """Actions whose worst-case end-of-lap wear stays below 100%.
+
+    Accept one observation or a batch. The small guard covers float32 feature
+    rounding; actual simulator wear is never clipped. Safety-car status is
+    known for the entire current lap. This is a physical feasibility rule,
+    not a heuristic for selecting among legal pit compounds.
+    """
+    obs = np.asarray(observations, dtype=np.float32)
+    current = np.rint(obs[..., 1] * 2).astype(int)
+    factor = obs[..., 11].astype(np.float64) * np.where(obs[..., 5] >= 0.5, 0.35, 1.0)
+    fresh_wear = factor[..., None] * np.array([0.058, 0.039, 0.029]) * MAX_WEAR_NOISE
+    stay_wear = obs[..., 3].astype(np.float64) + np.take_along_axis(
+        fresh_wear, current[..., None], axis=-1
+    )[..., 0]
+    return np.concatenate([stay_wear[..., None], fresh_wear], axis=-1) <= WEAR_LIMIT - WEAR_GUARD
+
 
 class Compound(IntEnum):
     SOFT = 0
@@ -74,6 +97,10 @@ class RaceConfig:
             raise ValueError("Costs must be nonnegative and wear multiplier positive.")
         if self.initial_fuel_kg + 1e-8 < self.laps * self.fuel_burn_kg:
             raise ValueError("Starting fuel must cover the configured race distance.")
+        if (0.029 * self.wear_multiplier * MAX_WEAR_NOISE > WEAR_LIMIT - WEAR_GUARD
+                or 0.029 * float(np.float32(self.wear_multiplier)) * MAX_WEAR_NOISE
+                > WEAR_LIMIT - WEAR_GUARD):
+            raise ValueError("Even fresh hard tyres must last one green-flag lap below 100% wear.")
 
     @classmethod
     def for_laps(cls, laps: int, **settings) -> RaceConfig:
@@ -123,6 +150,8 @@ class RaceEnv:
         "reward_reference_over_100",
     )
     observation_n = len(OBSERVATION_NAMES)
+    environment_version = ENVIRONMENT_VERSION
+    wear_limit = WEAR_LIMIT
 
     def __init__(self, config: RaceConfig | None = None, seed: int | None = None):
         self.config = config or RaceConfig()
@@ -148,6 +177,9 @@ class RaceEnv:
     @property
     def safety_car(self) -> bool:
         return self.safety_car_remaining > 0
+
+    def action_mask(self) -> np.ndarray:
+        return action_mask(self._observation())
 
     def _observation(self) -> np.ndarray:
         c = self.config
@@ -206,6 +238,8 @@ class RaceEnv:
             action = Action(int(action))
         except (ValueError, TypeError, OverflowError) as exc:
             raise ValueError(f"Action must be in [0, {self.action_n - 1}].") from exc
+        if not self.action_mask()[action]:
+            raise ValueError("Action could exceed 100% tyre wear on this lap; choose a safe tyre change.")
 
         c = self.config
         was_safety_car = self.safety_car
@@ -236,6 +270,8 @@ class RaceEnv:
             * wear_multiplier
             * wear_noise
         )
+        if self.wear > WEAR_LIMIT:
+            raise RuntimeError("Tyre wear constraint violated.")
         self.tyre_age += 1
         self.fuel = max(0.0, self.fuel - c.fuel_burn_kg)
         self.total_time += lap_time

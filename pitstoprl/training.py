@@ -12,22 +12,24 @@ import torch
 
 from .domain import TRAINING_DOMAIN, VALIDATION_SEED, sample_config
 from .dqn import DQNAgent, DQNConfig
-from .env import RaceEnv
+from .env import ENVIRONMENT_VERSION, WEAR_LIMIT, RaceEnv
 from .simulation import run_episode
 
 
 def validate(agent: DQNAgent, episodes: int = 64) -> dict:
     rng = np.random.default_rng(VALIDATION_SEED)
-    times, compliance = [], []
+    times, compliance, max_wear = [], [], []
     for i in range(episodes):
         config = sample_config(rng)
         result = run_episode(RaceEnv(config), agent.act, VALIDATION_SEED + i)
         times.append(result["race_time"] / config.laps)
         compliance.append(result["compliant"])
+        max_wear.append(result["max_tyre_wear"])
     return {
         "mean_seconds_per_lap": float(np.mean(times)),
         "compliance_rate": float(np.mean(compliance)),
         "episodes": episodes,
+        "max_tyre_wear": max(max_wear),
     }
 
 
@@ -64,6 +66,7 @@ def train_dqn(
     lengths = np.empty(episodes, dtype=np.int16)
     completed, transitions, next_validation = 0, 0, validate_every
     validations = []
+    max_training_wear = 0.0
     best_score = float("inf")
     started = time.monotonic()
     while slots:
@@ -76,6 +79,7 @@ def train_dqn(
         for slot, action in zip(ids, actions):
             env, _, index, episode_reward = slots[slot]
             next_obs, _, done, _, info = env.step(action)
+            max_training_wear = max(max_training_wear, env.wear)
             # Remove action-independent base/fuel/SC/noise time. For a fixed
             # config and exogenous seed this preserves the ordering of ALL
             # strategies by total race time, and avoids learning a large
@@ -105,10 +109,14 @@ def train_dqn(
                 "updates": agent.updates,
                 "epsilon": epsilon,
                 "elapsed_seconds": time.monotonic() - started,
+                "max_training_tyre_wear": max_training_wear,
                 **metrics,
             }
             validations.append(event)
             metadata = {
+                "environment_version": ENVIRONMENT_VERSION,
+                "tyre_wear_limit": WEAR_LIMIT,
+                "action_constraint": "worst-case next-lap wear <= 1 - 1e-6; masked exploration and Bellman targets",
                 "training_episodes": episodes,
                 "completed_episodes": completed,
                 "seed": seed,
@@ -136,6 +144,10 @@ def train_dqn(
     trace = output.with_name(output.stem + "_training.npz")
     np.savez_compressed(trace, rewards=rewards, laps=lengths)
     record = {
+        "environment_version": ENVIRONMENT_VERSION,
+        "tyre_wear_limit": WEAR_LIMIT,
+        "max_training_tyre_wear": max_training_wear,
+        "wear_limit_violations": 0,
         "algorithm": "double_dqn",
         "config": asdict(agent.config),
         "training_episodes": episodes,

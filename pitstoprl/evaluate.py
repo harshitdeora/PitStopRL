@@ -14,7 +14,7 @@ import torch
 
 from .domain import TEST_SEED, benchmark_configs, config_dict
 from .dqn import DQNAgent
-from .env import RaceEnv
+from .env import ENVIRONMENT_VERSION, WEAR_LIMIT, RaceEnv
 from .policies import FixedStintPolicy, RuleBasedPolicy
 from .simulation import run_episode
 
@@ -39,7 +39,7 @@ def evaluate(
             raise ValueError("Evaluation overlaps checkpoint training or validation seeds.")
     policies = {
         "Double DQN": agent.act,
-        "Fixed stint": FixedStintPolicy(),
+        "Planned + safety": FixedStintPolicy(),
         "Rule based": RuleBasedPolicy(),
     }
     rows = []
@@ -73,6 +73,8 @@ def evaluate(
                 "ci95_seconds": round(float(1.96 * times.std(ddof=1) / np.sqrt(episodes)), 3),
                 "mean_pit_stops": round(float(np.mean([r["pit_stops"] for r in subset])), 3),
                 "compliance_rate": round(float(np.mean([r["compliant"] for r in subset])), 4),
+                "max_tyre_wear": max(r["max_tyre_wear"] for r in subset),
+                "wear_limit_violations": sum(r["wear_limit_violations"] for r in subset),
             }
         for name, times in times_by_name.items():
             paired_gap = times - times_by_name["Double DQN"]
@@ -90,6 +92,9 @@ def evaluate(
     (output_dir / "protocol.json").write_text(
         json.dumps(
             {
+                "environment_version": ENVIRONMENT_VERSION,
+                "tyre_wear_limit": WEAR_LIMIT,
+                "fixed_baseline": "medium-to-hard at 40% distance, plus tyre-safety stops before 100% wear",
                 "episodes_per_scenario_per_policy": episodes,
                 "strategies": list(policies),
                 "test_seed_range": [seed, seed + episodes - 1],

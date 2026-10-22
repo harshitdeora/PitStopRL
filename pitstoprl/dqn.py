@@ -13,7 +13,7 @@ import numpy as np
 import torch
 from torch import nn
 
-from .env import RaceEnv
+from .env import ENVIRONMENT_VERSION, WEAR_LIMIT, RaceEnv, action_mask
 
 
 @dataclass(frozen=True)
@@ -41,6 +41,8 @@ class DQNConfig:
         )
         if any(not isinstance(n, int) or n < 1 for n in counts):
             raise ValueError("Network/replay sizes and intervals must be positive integers.")
+        if self.observation_n != RaceEnv.observation_n or self.action_n != 4:
+            raise ValueError("Network dimensions must match the contextual race environment.")
         if not self.batch_size <= self.warmup <= self.replay_capacity:
             raise ValueError("Require batch_size <= warmup <= replay_capacity.")
         if not 0 <= self.gamma <= 1 or self.learning_rate <= 0 or self.gradient_clip <= 0:
@@ -134,10 +136,16 @@ class DQNAgent:
             raise ValueError("Observations must be finite and epsilon in [0, 1].")
         with torch.inference_mode():
             values = self.network(torch.from_numpy(observations))
+            allowed = action_mask(observations)
+            values = values.masked_fill(~torch.from_numpy(allowed), -torch.inf)
             actions = values.argmax(dim=1).numpy()
         if epsilon:
             mask = self.rng.random(len(actions)) < epsilon
-            actions[mask] = self.rng.integers(self.config.action_n, size=int(mask.sum()))
+            # Independent continuous draws give a uniform choice among legal
+            # actions only; exploration must obey the same physics as inference.
+            draws = self.rng.random((int(mask.sum()), self.config.action_n))
+            draws[~allowed[mask]] = -1
+            actions[mask] = draws.argmax(axis=1)
         return actions
 
     def act(self, observation: np.ndarray, epsilon: float = 0.0) -> int:
@@ -157,7 +165,10 @@ class DQNAgent:
         predicted = self.network(states).gather(1, actions[:, None]).squeeze(1)
         with torch.no_grad():
             # Double DQN: online network selects; frozen target network evaluates.
-            selected = self.network(next_states).argmax(dim=1, keepdim=True)
+            allowed = torch.from_numpy(action_mask(next_states.numpy()))
+            selected = self.network(next_states).masked_fill(~allowed, -torch.inf).argmax(
+                dim=1, keepdim=True
+            )
             future = self.target(next_states).gather(1, selected).squeeze(1)
             targets = rewards + self.config.gamma * (1.0 - done) * future
         loss = nn.functional.smooth_l1_loss(predicted, targets)
@@ -176,7 +187,9 @@ class DQNAgent:
         path = Path(path)
         path.parent.mkdir(parents=True, exist_ok=True)
         payload = {
-            "format_version": 1,
+            "format_version": 2,
+            "environment_version": ENVIRONMENT_VERSION,
+            "tyre_wear_limit": WEAR_LIMIT,
             "algorithm": "double_dqn",
             "observation_names": list(RaceEnv.OBSERVATION_NAMES),
             "config": asdict(self.config),
@@ -191,8 +204,10 @@ class DQNAgent:
     @classmethod
     def load(cls, path: str | Path) -> DQNAgent:
         payload = torch.load(path, map_location="cpu", weights_only=True)
-        if payload.get("format_version") != 1 or payload.get("algorithm") != "double_dqn":
-            raise ValueError("Unsupported checkpoint format.")
+        if (payload.get("format_version") != 2 or payload.get("algorithm") != "double_dqn"
+                or payload.get("environment_version") != ENVIRONMENT_VERSION
+                or payload.get("tyre_wear_limit") != WEAR_LIMIT):
+            raise ValueError("Checkpoint does not match the 100% wear-limit environment; retrain it.")
         if payload["observation_names"] != list(RaceEnv.OBSERVATION_NAMES):
             raise ValueError("Checkpoint observation schema does not match this environment.")
         agent = cls(DQNConfig(**payload["config"]), training=False)

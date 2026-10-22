@@ -58,8 +58,9 @@ def test_configurable_horizon_fuel_and_baseline_trigger(laps):
         obs, reward, done, _, _ = env.step(rule(obs))
         reward_sum += reward
         assert done == (step == laps - 1)
-    assert env.pit_count == 1
+    assert env.pit_count >= 1
     assert env.changed_compound
+    assert max(row["wear"] for row in env.history) <= 1
     assert env.fuel == pytest.approx(0, abs=1e-8)
     assert reward_sum == pytest.approx(laps - env.total_time / 100)
 

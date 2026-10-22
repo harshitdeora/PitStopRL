@@ -125,6 +125,10 @@
     const minutes = Math.floor(ticks / 6000), secs = (ticks % 6000) / 100;
     return `${String(minutes).padStart(2, '0')}:${secs.toFixed(2).padStart(5, '0')}`;
   }
+  function wearPercent(wear) {
+    // Truncate for display so 99.999% is not rounded up to a misleading 100%.
+    return (Math.floor(wear * 10000) / 100).toFixed(2);
+  }
   function setPlaying(value) {
     playing = value;
     lastFrame = null;
@@ -174,6 +178,7 @@
     Object.entries(comparison).forEach(([name, result]) => {
       $(`${name}-total-time`).textContent = clock(result.time);
       $(`${name}-total-seconds`).textContent = `${result.time.toFixed(2)} seconds`;
+      $(`${name}-max-wear`).textContent = `Peak tyre wear: ${wearPercent(Math.max(...result.records.map(record => record.after.wear)))}% · limit 100%`;
       $(`${name}-result-detail`).textContent = `${result.pits} pit ${result.pits === 1 ? 'stop' : 'stops'} · ${result.changed ? 'Compound rule met' : `${result.config.terminal_rule_penalty}s compound penalty included`}`;
     });
     $('comparison-race').textContent = `${race.config.laps} laps · seed ${race.seed} · wear ${race.config.wear_multiplier.toFixed(1)}× · pit cost ${race.config.pit_loss_seconds}s · safety-car chance ${(race.config.safety_car_probability * 100).toFixed(1)}%`;
@@ -237,13 +242,15 @@
     record.q.forEach((value, index) => {
       const row = $(`q-${index}`);
       row.classList.toggle('selected', index === record.action);
+      row.classList.toggle('unavailable', !record.actionMask[index]);
       row.querySelector('.q-fill').style.width = `${12 + 88 * (value - minimum) / range}%`;
       row.querySelector('.q-score').textContent = value.toFixed(2);
-      row.title = `${E.ACTIONS[index]}: Q = ${value.toFixed(6)}. Bar length shows relative value, not probability.`;
+      row.title = `${E.ACTIONS[index]}: Q = ${value.toFixed(6)}. ${record.actionMask[index] ? 'Allowed action.' : 'Unavailable: could exceed 100% tyre wear.'} Bar length shows relative value, not probability.`;
     });
     $('decision-label').textContent = actionNames[record.action];
     $('decision-detail').textContent = record.action
-      ? record.safetyCar ? 'A tyre change at the safety-car pit rate.' : `A fresh set of ${names[record.after.compound].toLowerCase()} tyres.`
+      ? !record.actionMask[0] ? 'Tyre change required to stay below 100% wear.'
+        : record.safetyCar ? 'A tyre change at the safety-car pit rate.' : `A fresh set of ${names[record.after.compound].toLowerCase()} tyres.`
       : `Continue on the current ${names[record.before.compound].toLowerCase()} tyres.`;
     $('track-status').classList.toggle('safety', record.safetyCar);
     $('track-status').querySelector('span').textContent = record.safetyCar ? 'SAFETY CAR' : 'GREEN FLAG';
@@ -264,7 +271,7 @@
     $('compound-name').textContent = names[compound];
     $('tyre-age').textContent = `${state.tyreAge} ${state.tyreAge === 1 ? 'lap' : 'laps'} old`;
     document.querySelectorAll('.compound-keys>span').forEach((node, index) => node.classList.toggle('active', index === compound));
-    $('wear-value').innerHTML = `${Math.round(state.wear * 100)}<span>%</span>`;
+    $('wear-value').innerHTML = `${wearPercent(state.wear)}<span>%</span>`;
     $('wear-description').textContent = state.wear < .15 ? 'Fresh rubber' : state.wear < .45 ? 'In the window' : state.wear < .8 ? 'Grip fading' : 'High degradation';
     $('wear-fill').style.width = `${Math.min(state.wear * 100, 100)}%`;
     $('wear-fill').style.background = state.wear < .45 ? 'var(--lime)' : state.wear < .8 ? 'var(--amber)' : 'var(--soft)';

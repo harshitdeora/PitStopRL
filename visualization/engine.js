@@ -7,6 +7,9 @@
   'use strict';
   const COMPOUNDS = ['SOFT', 'MEDIUM', 'HARD'];
   const ACTIONS = ['STAY OUT', 'PIT SOFT', 'PIT MEDIUM', 'PIT HARD'];
+  const ENVIRONMENT_VERSION = 'wear_limit_v1';
+  const WEAR_LIMIT = 1, MAX_WEAR_NOISE = 1.07, WEAR_GUARD = 1e-6;
+  const WEAR_RATES = [.058, .039, .029];
   const DEFAULTS = {
     laps: 57, base_lap_time: 88, fuel_burn_kg: 1.8,
     fuel_penalty_per_kg: .030, pit_loss_seconds: 22,
@@ -46,7 +49,18 @@
       throw new Error('Safety-car probability must be between 0 and 1.');
     if (config.initial_fuel_kg <= 0 || config.initial_fuel_kg + 1e-8 < config.laps * config.fuel_burn_kg)
       throw new Error('Starting fuel must cover the race distance.');
+    if (.029 * Math.max(config.wear_multiplier, Math.fround(config.wear_multiplier))
+      * MAX_WEAR_NOISE > WEAR_LIMIT - WEAR_GUARD)
+      throw new Error('Even fresh hard tyres must last one green-flag lap below 100% wear.');
     return config;
+  }
+
+  function actionMask(observation) {
+    const obs = observation.map(Math.fround);
+    const current = Math.round(obs[1] * 2);
+    const factor = obs[11] * (obs[5] >= .5 ? .35 : 1);
+    const fresh = WEAR_RATES.map(rate => factor * rate * MAX_WEAR_NOISE);
+    return [obs[3] + fresh[current], ...fresh].map(wear => wear <= WEAR_LIMIT - WEAR_GUARD);
   }
 
   function infer(model, observation) {
@@ -63,19 +77,26 @@
       activations.push(values);
     });
     if (!values.every(Number.isFinite)) throw new Error('Non-finite network output.');
-    let action = 0;
-    for (let i = 1; i < values.length; i++) if (values[i] > values[action]) action = i;
-    return { action, q: values, activations };
+    const allowed = actionMask(observation);
+    let action = -1;
+    for (let i = 0; i < values.length; i++)
+      if (allowed[i] && (action < 0 || values[i] > values[action])) action = i;
+    if (action < 0) throw new Error('No action can keep tyre wear below 100%.');
+    return { action, q: values, activations, actionMask: allowed };
   }
 
   // Evaluation-only policies matching pitstoprl/policies.py. They do not
   // supply labels, training rewards, or overrides for the DQN agent.
   function fixedStintPolicy(observation) {
-    const changed = observation[7] >= .5;
+    const allowed = actionMask(observation);
+    const current = Math.round(observation[1] * 2);
     const total = Math.round(observation[9] * 100);
     const remaining = Math.round(observation[8] * 100);
     const trigger = Math.min(Math.max(Math.trunc(total * .4), 0), total - 1);
-    return total - remaining >= trigger && !changed ? 3 : 0;
+    const hardPhase = total - remaining >= trigger;
+    const preferred = hardPhase ? 3 : 2;
+    if ((hardPhase && current !== 2) || !allowed[0]) return allowed[preferred] ? preferred : 3;
+    return 0;
   }
 
   function wearBasedPolicy(observation) {
@@ -83,18 +104,21 @@
     const remaining = Math.round(observation[8] * 100);
     const current = Math.round(observation[1] * 2);
     // The Python policy compares a float32 wear feature with this threshold.
-    let shouldPit = observation[3] > Math.fround(.8);
+    const allowed = actionMask(observation);
+    let shouldPit = observation[3] > Math.fround(.8) || !allowed[0];
     if (!shouldPit && remaining < 14 && observation[7] < .5 && age >= 10) shouldPit = true;
     if (!shouldPit) return 0;
     let target = remaining <= 13 ? 0 : remaining <= 27 ? 1 : 2;
     if (target === current) target = current !== 2 ? 2 : 1;
-    return target + 1;
+    return allowed[target + 1] ? target + 1 : 3;
   }
 
   class Race {
     constructor(model, settings = {}, seed = 2000000, random = null) {
       if (!Number.isInteger(seed) || seed < 0 || seed > 4294967295)
         throw new Error('Seed must be a whole number between 0 and 4294967295.');
+      if (model.environment_version !== ENVIRONMENT_VERSION || model.tyre_wear_limit !== WEAR_LIMIT)
+        throw new Error('Re-export the dashboard with a model trained for the 100% wear limit.');
       this.model = model;
       this.config = makeConfig(settings);
       this.random = random || new Random(seed);
@@ -130,6 +154,8 @@
       const prediction = infer(this.model, observation);
       const action = forcedAction ?? prediction.action;
       if (!Number.isInteger(action) || action < 0 || action > 3) throw new Error('Invalid action.');
+      if (!prediction.actionMask[action])
+        throw new Error('Action could exceed 100% tyre wear on this lap; choose a safe tyre change.');
       const safetyCar = this.scRemaining > 0;
       const pitLoss = action ? c.pit_loss_seconds * (safetyCar ? c.safety_car_pit_factor : 1) : 0;
       if (action) {
@@ -143,8 +169,9 @@
         + noise + (safetyCar ? c.safety_car_lap_delta : 0);
       const lapTime = uncontrollable + tyreCost + pitLoss;
       const wearNoise = this.random.uniform(.93, 1.07);
-      this.wear += [.058, .039, .029][this.compound] * c.wear_multiplier
+      this.wear += WEAR_RATES[this.compound] * c.wear_multiplier
         * (safetyCar ? .35 : 1) * wearNoise;
+      if (this.wear > WEAR_LIMIT) throw new Error('Tyre wear constraint violated.');
       this.tyreAge++; this.fuel = Math.max(0, this.fuel - c.fuel_burn_kg);
       this.time += lapTime; this.lap++;
       if (this.scRemaining > 0) this.scRemaining--;
@@ -154,7 +181,7 @@
       const penalty = this.lap === c.laps && !this.changed ? c.terminal_rule_penalty : 0;
       this.time += penalty;
       const record = { lap: this.lap, before, after: this.state(), observation,
-        action, q: prediction.q, activations: prediction.activations,
+        action, q: prediction.q, activations: prediction.activations, actionMask: prediction.actionMask,
         safetyCar, pitLoss, lapTime, penalty, wearNoise,
         reward: -(tyreCost + pitLoss + penalty) / 10,
         rawReward: (c.reward_reference_seconds - lapTime - penalty) / c.reward_scale,
@@ -188,6 +215,6 @@
     return races;
   }
 
-  return { Race, Random, infer, makeConfig, fixedStintPolicy, wearBasedPolicy,
-    compareStrategies, COMPOUNDS, ACTIONS };
+  return { Race, Random, infer, makeConfig, actionMask, fixedStintPolicy, wearBasedPolicy,
+    compareStrategies, COMPOUNDS, ACTIONS, ENVIRONMENT_VERSION, WEAR_LIMIT };
 });
