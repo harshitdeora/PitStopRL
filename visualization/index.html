@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#101313">
+  <title>PitStopRL — Inside the pit wall</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="wordmark" href="#" aria-label="PitStopRL home"><span class="brand-icon">P<span>/</span></span>PitStop<span class="lime">RL</span><span class="brand-divider"></span><span class="brand-caption">STRATEGY LAB</span></a>
+    <div class="top-actions"><span class="local-status"><i></i> LOCAL INFERENCE</span><button class="text-button" id="about-button">How it works <span>↗</span></button></div>
+  </header>
+  <main>
+    <section class="intro">
+      <div><div class="eyebrow"><span class="tiny-stripe"></span> REINFORCEMENT LEARNING, IN MOTION</div><h1>Inside the pit wall<span class="lime">.</span></h1><p>One car. Four choices. A neural network calling the stops.</p></div>
+      <div class="model-badge"><span class="model-orbit">✳</span><div><strong>Double DQN</strong><span>Trained model · frozen weights</span></div><span class="badge-dot"></span></div>
+    </section>
+
+    <section class="scenario-bar" aria-label="Race configuration">
+      <label class="scenario-select"><span class="field-label">RACE SCENARIO</span><select id="scenario"><option value="reference">The reference race</option><option value="heldout">The unseen distance</option><option value="endurance">The long game</option><option value="safety">Safety-car opportunities</option><option value="expensive">Every stop counts</option><option value="custom">Custom conditions</option></select></label>
+      <label><span class="field-label">LAPS</span><input id="laps" type="number" min="1" max="300" value="57" aria-label="Race laps"></label>
+      <label><span class="field-label">TYRE WEAR</span><select id="wear" aria-label="Tyre wear"><option value="0.7">Low · 0.7×</option><option value="1" selected>Normal · 1.0×</option><option value="1.3">High · 1.3×</option></select></label>
+      <label><span class="field-label">PIT COST</span><select id="pit-cost" aria-label="Pit-stop cost"><option value="12">12 seconds</option><option value="22" selected>22 seconds</option><option value="32">32 seconds</option></select></label>
+      <label><span class="field-label">SAFETY CAR</span><select id="sc-chance" aria-label="Safety-car frequency"><option value="0">Off</option><option value="0.035" selected>Standard</option><option value="0.07">Frequent</option></select></label>
+      <label class="seed-field"><span class="field-label">RACE SEED</span><input id="seed" type="number" min="0" max="4294967295" value="2000000" aria-label="Random seed"></label>
+      <button class="build-button" id="new-race">Load race <span>↗</span></button>
+    </section>
+    <div class="notice" id="notice" role="status" hidden></div>
+
+    <div class="dashboard">
+      <section class="panel circuit-panel" aria-label="Animated race circuit">
+        <div class="panel-top"><div class="panel-heading"><span class="section-index">01</span><h2>The race</h2></div><div class="track-status" id="track-status"><i></i><span>GREEN FLAG</span></div></div>
+        <div class="circuit-stage">
+          <div class="lap-counter"><span class="field-label">LAP</span><div><strong id="lap-number">01</strong><span>/ <span id="lap-total">57</span></span></div><span class="lap-caption" id="lap-caption">Ready on the grid</span></div>
+          <div class="race-clock"><span class="field-label">ELAPSED RACE TIME</span><strong id="race-time">00:00.00</strong><span id="run-state">Awaiting lights out</span></div>
+          <svg class="circuit" id="circuit" viewBox="0 0 900 480" aria-label="Illustrative circuit and pit lane">
+            <defs>
+              <path id="track-geometry" d="M 450 335 L 665 335 Q 740 335 745 284 L 750 237 Q 754 210 719 191 L 650 151 Q 614 132 584 149 L 516 184 Q 489 197 466 177 L 433 147 Q 412 127 386 140 L 263 195 Q 237 207 229 241 L 217 287 Q 208 335 264 335 Z"/>
+              <pattern id="grid-pattern" width="30" height="30" patternUnits="userSpaceOnUse"><path d="M 30 0 L 0 0 0 30" fill="none" stroke="#a1b5aa" stroke-opacity=".045" stroke-width="1"/></pattern>
+              <pattern id="finish-pattern" width="8" height="8" patternUnits="userSpaceOnUse"><rect width="8" height="8" fill="#d9e1d8"/><rect width="4" height="4" fill="#101514"/><rect x="4" y="4" width="4" height="4" fill="#101514"/></pattern>
+              <filter id="car-glow" x="-100%" y="-100%" width="300%" height="300%"><feGaussianBlur stdDeviation="5"/></filter>
+            </defs>
+            <rect width="900" height="480" fill="url(#grid-pattern)"/>
+            <g class="terrain"><path d="M 290 205 L 535 145 L 633 212 L 575 286 L 393 300 L 299 256 Z"/><path d="M 720 300 L 796 302 L 806 362 L 728 350 Z"/><path d="M 110 165 L 167 164 L 180 254 L 108 267 Z"/></g>
+            <g class="grandstands"><path d="M 315 361 H 582"/><path d="M 321 370 H 574"/><path d="M 325 379 H 568"/><path d="M 185 156 L 197 216"/><path d="M 174 157 L 186 217"/><path d="M 670 140 L 724 167"/><path d="M 674 130 L 730 158"/></g>
+            <path id="track" d="M 450 335 L 665 335 Q 740 335 745 284 L 750 237 Q 754 210 719 191 L 650 151 Q 614 132 584 149 L 516 184 Q 489 197 466 177 L 433 147 Q 412 127 386 140 L 263 195 Q 237 207 229 241 L 217 287 Q 208 335 264 335 Z" fill="none" stroke="#44504b" stroke-width="39" stroke-linecap="round" stroke-linejoin="round"/>
+            <use href="#track-geometry" class="kerbs" fill="none" stroke="#a6bf8b" stroke-width="35" stroke-dasharray="5 8"/>
+            <use href="#track-geometry" fill="none" stroke="#252d2a" stroke-width="29"/>
+            <use href="#track-geometry" fill="none" stroke="#8fa87f" stroke-width="1" stroke-dasharray="4 10" opacity=".5"/>
+            <path id="pit-path" d="M 450 335 L 495 335 Q 524 335 541 310 Q 551 294 578 294 L 661 294 Q 685 294 705 312 L 718 321" fill="none" stroke="#3b4740" stroke-width="10"/>
+            <path d="M 450 335 L 495 335 Q 524 335 541 310 Q 551 294 578 294 L 661 294 Q 685 294 705 312 L 718 321" fill="none" stroke="#7e947d" stroke-width="1" stroke-dasharray="4 5"/>
+            <rect x="449" y="318" width="10" height="34" fill="url(#finish-pattern)"/>
+            <g class="pit-building"><rect x="553" y="267" width="104" height="16" rx="2"/><path d="M 568 267 V 283 M 585 267 V 283 M 602 267 V 283 M 619 267 V 283 M 636 267 V 283"/></g>
+            <g class="track-labels"><text x="606" y="249" text-anchor="middle">PIT LANE</text><text x="450" y="403" text-anchor="middle">START / FINISH</text><text x="392" y="236">PITSTOP</text><text x="511" y="236" class="infield-rl">RL</text><text x="450" y="256" text-anchor="middle" class="infield-sub">STRATEGY CIRCUIT</text><text x="781" y="251">T01</text><text x="404" y="119">T05</text><text x="183" y="283">T08</text></g>
+            <g id="pit-pulse" opacity="0"><circle cx="604" cy="294" r="20" fill="none" stroke="#d5ff65" stroke-width="1"/><circle cx="604" cy="294" r="6" fill="#d5ff65"/></g>
+            <g id="car-trail"><circle cx="0" cy="0" r="13" fill="#d5ff65" opacity=".2" filter="url(#car-glow)"/></g>
+            <g id="race-car"><ellipse cx="0" cy="0" rx="18" ry="9" fill="#000" opacity=".5" transform="translate(1 3)"/><rect class="car-tyre" x="-10" y="-10" width="5" height="5" rx="1" fill="#101312"/><rect class="car-tyre" x="-10" y="5" width="5" height="5" rx="1" fill="#101312"/><rect class="car-tyre" x="7" y="-10" width="4" height="5" rx="1" fill="#101312"/><rect class="car-tyre" x="7" y="5" width="4" height="5" rx="1" fill="#101312"/><path d="M -14 -6 H -9 L -5 -4 L 9 -3 L 17 -2 V 2 L 9 3 L -5 4 L -9 6 H -14 Z" fill="#d5ff65"/><rect x="10" y="-8" width="3" height="16" rx="1" fill="#d5ff65"/><rect x="-16" y="-8" width="3" height="16" rx="1" fill="#b4cd80"/><ellipse cx="0" cy="0" rx="3" ry="2.5" fill="#18221b"/></g>
+            <g id="sc-car" opacity="0"><rect x="-12" y="-6" width="24" height="12" rx="4" fill="#f5bd4f"/><rect x="-5" y="-4" width="9" height="8" rx="2" fill="#3b321d"/><path d="M -2 -7 H 4" stroke="#ffdf8c" stroke-width="3"/></g>
+          </svg>
+          <div class="track-legend"><span><i class="legend-car"></i> DQN agent</span><span><i class="legend-pit"></i> Pit lane</span><span class="illustration-label">Illustrative circuit</span></div>
+          <div class="track-event" id="track-event" hidden><span id="track-event-icon">↳</span><div><strong id="track-event-title">BOX, BOX</strong><span id="track-event-detail">Fresh tyres incoming</span></div></div>
+          <div class="finish-overlay" id="finish-overlay" hidden><span class="eyebrow">CHEQUERED FLAG</span><h3>Strategy delivered.</h3><p id="finish-summary"></p><button class="build-button" id="replay-race">Replay race ↻</button></div>
+        </div>
+        <div class="playback"><button class="play-button" id="play" aria-label="Play race"><span id="play-icon">▶</span><span id="play-label">Lights out</span></button><button class="icon-button" id="step" title="Advance one lap" aria-label="Advance one lap">❯|</button><button class="icon-button" id="restart" title="Restart race" aria-label="Restart race">↺</button><div class="scrubber"><input id="scrub" type="range" min="0" max="57" step="0.01" value="0" aria-label="Race playback position"><div><span id="scrub-current">LAP 01</span><span id="scrub-end">57 LAPS</span></div></div><button class="speed-button" id="speed" title="Change playback speed" aria-label="Change playback speed">1×</button></div>
+      </section>
+
+      <section class="panel brain-panel" aria-label="Live neural network and action values">
+        <div class="panel-top"><div class="panel-heading"><span class="section-index">02</span><h2>The decision</h2></div><button class="icon-button expand-button" id="expand-network" aria-label="Expand neural network">⤢</button></div>
+        <div class="network-title"><span class="network-status"><i></i> LIVE ACTIVATIONS</span><span class="network-architecture">27 → 128 → 128 → 4</span></div>
+        <div id="network-container" class="network-container"><svg id="network" viewBox="0 0 430 236" role="img" aria-label="Actual neural network activations for this lap"></svg></div>
+        <div class="network-labels"><span>Race inputs</span><span>Hidden layers</span><span>Q-values</span></div>
+        <div class="q-heading"><h3>Four choices. One call.</h3><span>Higher is better</span></div>
+        <div class="q-values" id="q-values"></div>
+        <div class="decision-call"><span class="call-icon">↳</span><div><span class="field-label">THE AGENT'S CALL</span><strong id="decision-label">Stay out</strong><span id="decision-detail">Continue on the current tyres.</span></div></div>
+        <p class="q-footnote">Actual model outputs · expected future reward, not probabilities.</p>
+      </section>
+
+      <section class="telemetry" aria-label="Current race telemetry">
+        <div class="telemetry-card"><span class="field-label">CURRENT COMPOUND</span><div class="telemetry-value"><span class="tyre-icon" id="tyre-icon">M</span><strong id="compound-name">Medium</strong><span id="tyre-age">0 laps old</span></div><div class="compound-keys"><span><i class="soft-dot"></i>SOFT</span><span class="active"><i class="medium-dot"></i>MEDIUM</span><span><i class="hard-dot"></i>HARD</span></div></div>
+        <div class="telemetry-card"><span class="field-label">TYRE WEAR</span><div class="telemetry-value"><strong id="wear-value">0<span>%</span></strong><span id="wear-description">Fresh rubber</span></div><div class="meter wear-meter"><span id="wear-fill"></span><i></i></div></div>
+        <div class="telemetry-card"><span class="field-label">FUEL REMAINING</span><div class="telemetry-value"><strong id="fuel-value">102.6<span>kg</span></strong><span id="fuel-laps">57 laps to go</span></div><div class="meter"><span id="fuel-fill"></span></div></div>
+        <div class="telemetry-card"><span class="field-label">RACE STRATEGY</span><div class="telemetry-value"><strong id="pit-count">0<span>stops</span></strong><span class="rule-status" id="rule-status">Second compound needed</span></div><div class="rule-line"><span class="rule-check" id="rule-check">○</span><span>Use at least two compounds</span></div></div>
+      </section>
+
+      <section class="panel strategy-panel"><div class="panel-top"><div class="panel-heading"><span class="section-index">03</span><h2>The bigger picture</h2></div><div class="stint-legend"><span><i class="soft-dot"></i>Soft</span><span><i class="medium-dot"></i>Medium</span><span><i class="hard-dot"></i>Hard</span><span><i class="sc-dot"></i>Safety car</span></div></div><div class="stint-section"><div class="stint-label"><strong>Tyre strategy</strong><span>Every stop leaves a mark.</span></div><div class="stint-chart-wrap"><div id="stint-chart" class="stint-chart" aria-label="Tyre compound used on each lap"></div><div class="stint-axis"><span>START</span><span id="stint-axis-middle">LAP 29</span><span id="stint-axis-end">LAP 57</span></div></div></div><div class="race-events" id="race-events" aria-live="polite"><span class="event-empty">Your race story starts at lights out.</span></div></section>
+    </div>
+    <footer><span><i></i> REAL WEIGHTS. REAL DECISIONS.</span><p>Frozen Double DQN · lap-based simulator · interpolated car movement</p><button class="text-button" id="inputs-button">Inspect all 27 inputs ↗</button></footer>
+  </main>
+  <dialog id="about-dialog"><button class="dialog-close icon-button" aria-label="Close explanation">×</button><span class="eyebrow">A WINDOW INTO THE AGENT</span><h2>Race state in.<br>Strategy out.</h2><p>This preview runs the project's trained Double DQN weights directly in your browser. No server, account or internet connection is needed after loading.</p><div class="explanation-steps"><div><span>01</span><strong>Observe</strong><p>The simulator supplies 27 features: distance remaining, tyre wear, fuel, safety-car status and the race settings.</p></div><div><span>02</span><strong>Evaluate</strong><p>Two hidden layers of 128 neurons produce four Q-values. Brighter neurons have larger activations; visible connections are a subset of the actual learned weights.</p></div><div><span>03</span><strong>Act</strong><p>The agent chooses the highest Q-value. The next lap changes the state, and the process repeats. Its weights stay fixed throughout playback.</p></div></div><p class="dialog-note">The car animation illustrates a lap-based strategy simulator. It does not model steering, overtaking or vehicle physics. Browser races use a deterministic browser RNG; the Python CLI uses NumPy's RNG, so an identical seed does not produce an identical race across the two implementations. The simulator equations and trained weights are the same.</p><p class="provenance" id="provenance"></p></dialog>
+  <dialog id="network-dialog" class="wide-dialog"><button class="dialog-close icon-button" aria-label="Close network explorer">×</button><span class="eyebrow">THE NETWORK, UNPACKED</span><h2>Not a black box. A closer look.</h2><p>Actual activations for the selected lap. Play to watch the network respond, or step through one decision at a time. Hover over a neuron to inspect its value.</p><div class="network-playback"><button class="play-button" id="network-play" aria-label="Play network">▶ Play network</button><button class="icon-button" id="network-step" aria-label="Advance network one lap">❯|</button><span id="network-lap">LAP 01</span><span>Selected learned connections · fixed weights</span></div><div id="large-network-container"></div><div class="network-labels"><span>27 race inputs</span><span>128 neurons · ReLU</span><span>128 neurons · ReLU</span><span>4 action values</span></div><div class="network-key"><span><i></i> Activation intensity</span><span>Violet / cyan edges: positive / negative weight</span><span>Weights remain fixed</span></div></dialog>
+  <dialog id="inputs-dialog"><button class="dialog-close icon-button" aria-label="Close input inspector">×</button><span class="eyebrow">WHAT THE AGENT SEES</span><h2>The current observation.</h2><p>These are the exact normalized features passed to the trained network before the selected lap.</p><div id="input-list" class="input-list"></div></dialog>
+  <script src="model.js"></script>
+  <script src="engine.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

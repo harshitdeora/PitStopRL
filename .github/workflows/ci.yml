@@ -12,6 +12,16 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
       - run: pip install -e ".[dev]"
       - run: ruff check .
       - run: pytest
+      - run: node --check visualization/engine.js
+      - run: node --check visualization/app.js
+      - name: Verify published dashboard matches the checkpoint and sources
+        run: |
+          python -m pitstoprl.visualize --output /tmp/dashboard.html
+          cmp docs/index.html /tmp/dashboard.html
+

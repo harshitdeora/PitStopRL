@@ -2,7 +2,11 @@
 
 An original reinforcement-learning mini-project for **variable-length F1-style pit strategy**. A contextual **Double DQN** learns whether to stay out or pit for soft, medium, or hard tyres. Its neural network predicts four action values from the current race and its settings. Training uses simulator interaction only: no expert labels, imitation, search planner, baseline demonstrations, forced pit decisions, or pit-advantage override.
 
-The simulator is a controlled teaching model, not a real F1 digital twin.
+**[Open the interactive dashboard](https://harshitdeora.github.io/PitStopRL/)** · [Benchmark results](results/dqn/RESULTS.md) · [Download the offline dashboard](https://raw.githubusercontent.com/harshitdeora/PitStopRL/main/docs/index.html)
+
+The dashboard shows an animated race, pit stops, tyre/fuel telemetry, the network's actual activations, and all four action values. Try different race lengths and conditions, then pause or step through each decision. The simulator is a controlled teaching model, not a real F1 digital twin.
+
+The live address uses GitHub Pages. A repository owner must enable **Settings → Pages → Deploy from a branch → main → /docs** once. The downloaded HTML works offline: save it as an `.html` file and open it in a browser.
 
 ## Install
 
@@ -31,6 +35,24 @@ python -m pitstoprl.demo --laps 90 --seed 2000001
 ```
 
 The default model is `artifacts/dqn.pt`. The demo prints total time, pit/safety-car events, and whether the two-compound rule was met. Starting fuel scales with race length. The simulator accepts other positive horizons, but this is **not a promise of generalization outside the tested domain**.
+
+## Interactive strategy dashboard
+
+```sh
+# Rebuild the version linked above and served by GitHub Pages.
+python -m pitstoprl.visualize --output docs/index.html
+
+# Or create a separate local copy.
+python -m pitstoprl.visualize --output outputs/PitStopRL_Visual_Lab.html
+```
+
+Open the exported HTML in a browser. It is a self-contained dashboard: no web server, additional frontend dependencies, model retraining, or external services are needed. It embeds the frozen weights from `artifacts/dqn.pt` and runs the forward pass directly in JavaScript.
+
+The visualization includes an animated circuit and pit lane, safety-car events, tyre/fuel gauges, actual per-lap Q-values and hidden-layer activations, a stint timeline, configurable conditions, pause/step/seek/replay controls, and a larger network explorer. Brightness represents activation magnitude; displayed edges are selected actual learned weights. Q-value bar lengths are relative scores, not probabilities. The weights do not change during a race.
+
+The JavaScript simulator uses the same equations as `RaceEnv` and is differentially tested against it for identical supplied random draws. It uses its own deterministic browser RNG, so a seed produces repeatable browser races but does not reproduce NumPy's exact Python race. Car motion interpolates lap-based events and is illustrative, not a vehicle-physics or opponent simulator. The offline exporter currently requires the repository checkout, which contains the HTML/CSS/JS sources in `visualization/`.
+
+The dashboard uses the frozen trained agent. It does not retrain it or change benchmark results. CI checks that `docs/index.html` matches the checkpoint and visualization sources, and verifies JavaScript/PyTorch activation equivalence and simulator equivalence. Node.js 24 is used for those checks; it is not needed to open the dashboard.
 
 ## RL formulation
 
@@ -124,6 +146,9 @@ pitstoprl/policies.py     evaluation-only baselines
 pitstoprl/train.py        training CLI
 pitstoprl/evaluate.py     paired benchmark and plots
 pitstoprl/demo.py         configurable demo CLI
+pitstoprl/visualize.py    standalone HTML exporter using real checkpoint weights
+visualization/           dashboard HTML, CSS, browser simulator and neural inference
+docs/index.html          self-contained dashboard served by GitHub Pages
 artifacts/               trained models, training traces and provenance
 tests/                   environment, learner and integration tests
 results/dqn/             current generalization results

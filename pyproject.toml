@@ -19,6 +19,7 @@ dev = ["pytest>=7.4", "ruff>=0.6"]
 pitstoprl-train = "pitstoprl.train:main"
 pitstoprl-evaluate = "pitstoprl.evaluate:main"
 pitstoprl-demo = "pitstoprl.demo:main"
+pitstoprl-visualize = "pitstoprl.visualize:main"
 
 [tool.setuptools.packages.find]
 include = ["pitstoprl*"]
