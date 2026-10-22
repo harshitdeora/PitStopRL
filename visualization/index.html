@@ -29,6 +29,16 @@
     </section>
     <div class="notice" id="notice" role="status" hidden></div>
 
+    <section class="comparison-panel panel" aria-labelledby="comparison-heading">
+      <div class="comparison-heading"><div><span class="eyebrow">SAME RACE. THREE STRATEGIES.</span><h2 id="comparison-heading">Race finish times</h2><p>Separate full-race totals. Lower time is better.</p></div><span class="comparison-units">MINUTES : SECONDS</span></div>
+      <div class="comparison-grid" aria-live="polite" aria-atomic="true">
+        <article class="comparison-card agent-result" aria-label="DQN agent result"><span class="field-label">YOUR AGENT</span><h3>Double DQN</h3><strong class="comparison-time" id="agent-total-time">—</strong><span class="comparison-seconds" id="agent-total-seconds"></span><p>Learned pit decisions</p><span class="comparison-detail" id="agent-result-detail"></span></article>
+        <article class="comparison-card" aria-label="Fixed strategy baseline result"><span class="field-label">BASELINE 01</span><h3>Fixed strategy</h3><strong class="comparison-time" id="fixed-total-time">—</strong><span class="comparison-seconds" id="fixed-total-seconds"></span><p>Medium → hard after 40% distance. One stop.</p><span class="comparison-detail" id="fixed-result-detail"></span></article>
+        <article class="comparison-card" aria-label="Wear-based baseline result"><span class="field-label">BASELINE 02</span><h3>Wear-based strategy</h3><strong class="comparison-time" id="wear-total-time">—</strong><span class="comparison-seconds" id="wear-total-seconds"></span><p>Pits above 80% wear or for a late compound change</p><span class="comparison-detail" id="wear-result-detail"></span></article>
+      </div>
+      <div class="comparison-notes"><p id="comparison-race"></p><p>Each strategy runs its own race with identical safety-car events and random noise. Totals include pit losses and any compound-rule penalty. They stay fixed during playback and recalculate when you load a race.</p></div>
+    </section>
+
     <div class="dashboard">
       <section class="panel circuit-panel" aria-label="Animated race circuit">
         <div class="panel-top"><div class="panel-heading"><span class="section-index">01</span><h2>The race</h2></div><div class="track-status" id="track-status"><i></i><span>GREEN FLAG</span></div></div>

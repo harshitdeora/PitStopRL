@@ -68,6 +68,29 @@
     return { action, q: values, activations };
   }
 
+  // Evaluation-only policies matching pitstoprl/policies.py. They do not
+  // supply labels, training rewards, or overrides for the DQN agent.
+  function fixedStintPolicy(observation) {
+    const changed = observation[7] >= .5;
+    const total = Math.round(observation[9] * 100);
+    const remaining = Math.round(observation[8] * 100);
+    const trigger = Math.min(Math.max(Math.trunc(total * .4), 0), total - 1);
+    return total - remaining >= trigger && !changed ? 3 : 0;
+  }
+
+  function wearBasedPolicy(observation) {
+    const age = observation[2] * 30;
+    const remaining = Math.round(observation[8] * 100);
+    const current = Math.round(observation[1] * 2);
+    // The Python policy compares a float32 wear feature with this threshold.
+    let shouldPit = observation[3] > Math.fround(.8);
+    if (!shouldPit && remaining < 14 && observation[7] < .5 && age >= 10) shouldPit = true;
+    if (!shouldPit) return 0;
+    let target = remaining <= 13 ? 0 : remaining <= 27 ? 1 : 2;
+    if (target === current) target = current !== 2 ? 2 : 1;
+    return target + 1;
+  }
+
   class Race {
     constructor(model, settings = {}, seed = 2000000, random = null) {
       if (!Number.isInteger(seed) || seed < 0 || seed > 4294967295)
@@ -119,8 +142,9 @@
       const uncontrollable = c.base_lap_time + c.fuel_penalty_per_kg * this.fuel
         + noise + (safetyCar ? c.safety_car_lap_delta : 0);
       const lapTime = uncontrollable + tyreCost + pitLoss;
+      const wearNoise = this.random.uniform(.93, 1.07);
       this.wear += [.058, .039, .029][this.compound] * c.wear_multiplier
-        * (safetyCar ? .35 : 1) * this.random.uniform(.93, 1.07);
+        * (safetyCar ? .35 : 1) * wearNoise;
       this.tyreAge++; this.fuel = Math.max(0, this.fuel - c.fuel_burn_kg);
       this.time += lapTime; this.lap++;
       if (this.scRemaining > 0) this.scRemaining--;
@@ -131,17 +155,39 @@
       this.time += penalty;
       const record = { lap: this.lap, before, after: this.state(), observation,
         action, q: prediction.q, activations: prediction.activations,
-        safetyCar, pitLoss, lapTime, penalty,
+        safetyCar, pitLoss, lapTime, penalty, wearNoise,
         reward: -(tyreCost + pitLoss + penalty) / 10,
         rawReward: (c.reward_reference_seconds - lapTime - penalty) / c.reward_scale,
         uncontrollable };
       this.records.push(record);
       return record;
     }
-    run() {
-      while (this.lap < this.config.laps) this.step();
+    run(policy = null) {
+      while (this.lap < this.config.laps) this.step(policy ? policy(this.observation()) : null);
       return this.records;
     }
   }
-  return { Race, Random, infer, makeConfig, COMPOUNDS, ACTIONS };
+
+  function compareStrategies(model, settings = {}, seed = 2000000) {
+    const races = {
+      agent: new Race(model, settings, seed),
+      fixed: new Race(model, settings, seed),
+      wear: new Race(model, settings, seed),
+    };
+    races.agent.run();
+    races.fixed.run(fixedStintPolicy);
+    races.wear.run(wearBasedPolicy);
+    // Each strategy has its own tyre state and decisions, but identical
+    // exogenous randomness. Guard this invariant if the simulator changes.
+    for (const baseline of [races.fixed, races.wear]) {
+      if (baseline.records.some((record, i) => record.safetyCar !== races.agent.records[i].safetyCar
+        || record.uncontrollable !== races.agent.records[i].uncontrollable
+        || record.wearNoise !== races.agent.records[i].wearNoise))
+        throw new Error('Race conditions did not match across strategies.');
+    }
+    return races;
+  }
+
+  return { Race, Random, infer, makeConfig, fixedStintPolicy, wearBasedPolicy,
+    compareStrategies, COMPOUNDS, ACTIONS };
 });

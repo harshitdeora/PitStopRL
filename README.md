@@ -4,7 +4,7 @@ An original reinforcement-learning mini-project for **variable-length F1-style p
 
 **[Open the interactive dashboard](https://harshitdeora.github.io/PitStopRL/)** · [Benchmark results](results/dqn/RESULTS.md) · [Download the offline dashboard](https://raw.githubusercontent.com/harshitdeora/PitStopRL/main/docs/index.html)
 
-The dashboard shows an animated race, pit stops, tyre/fuel telemetry, the network's actual activations, and all four action values. Try different race lengths and conditions, then pause or step through each decision. The simulator is a controlled teaching model, not a real F1 digital twin.
+The dashboard shows an animated race, pit stops, tyre/fuel telemetry, the network's actual activations, and all four action values. It also displays separate full-race times for your DQN agent, a fixed-stint baseline, and a wear-based baseline under identical conditions. Try different race lengths and conditions, then pause or step through each decision. The simulator is a controlled teaching model, not a real F1 digital twin.
 
 The live address uses GitHub Pages. A repository owner must enable **Settings → Pages → Deploy from a branch → main → /docs** once. The downloaded HTML works offline: save it as an `.html` file and open it in a browser.
 
@@ -49,6 +49,8 @@ python -m pitstoprl.visualize --output outputs/PitStopRL_Visual_Lab.html
 Open the exported HTML in a browser. It is a self-contained dashboard: no web server, additional frontend dependencies, model retraining, or external services are needed. It embeds the frozen weights from `artifacts/dqn.pt` and runs the forward pass directly in JavaScript.
 
 The visualization includes an animated circuit and pit lane, safety-car events, tyre/fuel gauges, actual per-lap Q-values and hidden-layer activations, a stint timeline, configurable conditions, pause/step/seek/replay controls, and a larger network explorer. Brightness represents activation magnitude; displayed edges are selected actual learned weights. Q-value bar lengths are relative scores, not probabilities. The weights do not change during a race.
+
+**Race finish times** compares three independent rollouts for the loaded settings and seed: Double DQN, a fixed medium-to-hard stop at 40% distance, and the same wear-based rule used in Python evaluation. Each strategy chooses its own stops and receives identical safety-car events, lap noise, and wear-noise draws. The cards show total time in minutes/seconds and seconds separately, plus stops and compound-rule status; no time-difference metric is shown. Totals include pit losses and any terminal compound penalty. They are computed when a race is loaded, remain fixed during playback, and update when new settings are applied. This is one paired race comparison, not an average over many seeds. The baselines never override or train the agent.
 
 The JavaScript simulator uses the same equations as `RaceEnv` and is differentially tested against it for identical supplied random draws. It uses its own deterministic browser RNG, so a seed produces repeatable browser races but does not reproduce NumPy's exact Python race. Car motion interpolates lap-based events and is illustrative, not a vehicle-physics or opponent simulator. The offline exporter currently requires the repository checkout, which contains the HTML/CSS/JS sources in `visualization/`.
 

@@ -13,6 +13,7 @@ import torch
 
 from pitstoprl.dqn import DQNAgent
 from pitstoprl.env import RaceConfig, RaceEnv
+from pitstoprl.policies import FixedStintPolicy, RuleBasedPolicy
 from pitstoprl.visualize import export_visualization
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -183,3 +184,89 @@ def test_browser_races_are_deterministic_and_use_own_config(exported_model):
     assert result["fuel"] == pytest.approx(0, abs=1e-8)
     assert result["completedThrows"]
     assert result["settings"]["initial_fuel_kg"] == pytest.approx(118.8)
+
+
+@pytest.mark.parametrize("laps", [1, 15, 66, 90])
+@pytest.mark.parametrize("policy_name,policy", [
+    ("fixedStintPolicy", FixedStintPolicy()),
+    ("wearBasedPolicy", RuleBasedPolicy()),
+])
+def test_browser_baseline_rollouts_match_python(exported_model, laps, policy_name, policy):
+    model, _ = exported_model
+    config = RaceConfig.for_laps(
+        laps, wear_multiplier=1.3, pit_loss_seconds=32, safety_car_probability=0.3
+    )
+    env = RaceEnv(config, seed=8)
+    recorder = RecordedRandom(8)
+    env.rng = recorder
+    obs = env._observation()
+    expected = []
+    for _ in range(laps):
+        action = policy(obs)
+        obs, _, _, _, info = env.step(action)
+        expected.append({
+            "action": action, "time": env.total_time, "pits": env.pit_count,
+            "compound": int(env.compound), "changed": env.changed_compound,
+            "penalty": info["rule_penalty"],
+        })
+    script = """
+      const fs=require('node:fs'), E=require(process.argv[1]);
+      const d=JSON.parse(fs.readFileSync(0,'utf8')); let offset=0;
+      function draw(kind) {
+        const item=d.draws[offset++];
+        if(!item || item.kind!==kind) throw Error('Random draw mismatch: '+kind);
+        return item.value;
+      }
+      const rng={normal:()=>draw('normal'),uniform:()=>draw('uniform'),
+        random:()=>draw('random'),integer:()=>draw('integers')};
+      const race=new E.Race(d.model,d.config,8,rng);
+      race.run(E[d.policy]);
+      if(offset!==d.draws.length) throw Error('Unused random draws');
+      process.stdout.write(JSON.stringify(race.records.map(r=>({action:r.action,
+        time:r.after.time,pits:r.after.pits,compound:r.after.compound,
+        changed:r.after.changed,penalty:r.penalty}))));
+    """
+    actual = node_run(script, {
+        "model": model, "config": asdict(config), "policy": policy_name, "draws": recorder.draws,
+    })
+    for python, browser in zip(expected, actual, strict=True):
+        assert browser["time"] == pytest.approx(python["time"], abs=1e-8)
+        for key in ("action", "pits", "compound", "changed", "penalty"):
+            assert browser[key] == python[key]
+
+
+def test_custom_comparisons_use_paired_randomness_and_include_penalties(exported_model):
+    model, _ = exported_model
+    script = """
+      const fs=require('node:fs'), E=require(process.argv[1]);
+      const model=JSON.parse(fs.readFileSync(0,'utf8')), before=JSON.stringify(model);
+      const settings=[{laps:1},{laps:15,wear_multiplier:.7},
+        {laps:57,safety_car_probability:0},{laps:66,wear_multiplier:1.3,pit_loss_seconds:32},
+        {laps:90,safety_car_probability:1,pit_loss_seconds:12},{laps:300}];
+      const results=settings.map((config,index)=>{
+        const seed=index%2 ? 4294967295 : 0;
+        const runs=E.compareStrategies(model,config,seed);
+        const repeat=E.compareStrategies(model,config,seed);
+        return {laps:config.laps, paired:Object.values(runs).every(r=>
+          r.records.every((lap,i)=>lap.safetyCar===runs.agent.records[i].safetyCar &&
+            lap.uncontrollable===runs.agent.records[i].uncontrollable &&
+            lap.wearNoise===runs.agent.records[i].wearNoise)),
+          strategies:Object.fromEntries(Object.entries(runs).map(([name,race])=>[name,{
+            laps:race.records.length,time:race.time,
+            summed:race.records.reduce((s,r)=>s+r.lapTime+r.penalty,0),
+            penalty:race.records.reduce((s,r)=>s+r.penalty,0),changed:race.changed,
+            repeat:JSON.stringify(race.records)===JSON.stringify(repeat[name].records)
+          }]))};
+      });
+      process.stdout.write(JSON.stringify({results,unchanged:before===JSON.stringify(model)}));
+    """
+    actual = node_run(script, model)
+    assert actual["unchanged"]
+    for scenario in actual["results"]:
+        assert scenario["paired"]
+        assert set(scenario["strategies"]) == {"agent", "fixed", "wear"}
+        for strategy in scenario["strategies"].values():
+            assert strategy["laps"] == scenario["laps"]
+            assert strategy["time"] == pytest.approx(strategy["summed"], abs=1e-8)
+            assert strategy["penalty"] == (0 if strategy["changed"] else 30)
+            assert strategy["repeat"]

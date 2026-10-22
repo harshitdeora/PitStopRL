@@ -121,7 +121,8 @@
   });
 
   function clock(seconds) {
-    const minutes = Math.floor(seconds / 60), secs = seconds - minutes * 60;
+    const ticks = Math.round(seconds * 100);
+    const minutes = Math.floor(ticks / 6000), secs = (ticks % 6000) / 100;
     return `${String(minutes).padStart(2, '0')}:${secs.toFixed(2).padStart(5, '0')}`;
   }
   function setPlaying(value) {
@@ -143,9 +144,9 @@
   }
   function loadRace() {
     try {
-      const candidate = new E.Race(model, settingsFromControls(), Number($('seed').value));
-      const trace = candidate.run();
-      race = candidate; records = trace;
+      const comparison = E.compareStrategies(model, settingsFromControls(), Number($('seed').value));
+      race = comparison.agent; records = race.records;
+      updateComparison(comparison);
       position = 0; shownLap = -1; eventKey = '';
       setPlaying(false);
       $('new-race').innerHTML = 'Load race <span>↗</span>';
@@ -168,6 +169,14 @@
       showNotice(outside ? 'Outside the training range: this race is an extrapolation test. The agent may make weaker decisions.' : '');
       render();
     } catch (error) { showNotice(error.message); }
+  }
+  function updateComparison(comparison) {
+    Object.entries(comparison).forEach(([name, result]) => {
+      $(`${name}-total-time`).textContent = clock(result.time);
+      $(`${name}-total-seconds`).textContent = `${result.time.toFixed(2)} seconds`;
+      $(`${name}-result-detail`).textContent = `${result.pits} pit ${result.pits === 1 ? 'stop' : 'stops'} · ${result.changed ? 'Compound rule met' : `${result.config.terminal_rule_penalty}s compound penalty included`}`;
+    });
+    $('comparison-race').textContent = `${race.config.laps} laps · seed ${race.seed} · wear ${race.config.wear_multiplier.toFixed(1)}× · pit cost ${race.config.pit_loss_seconds}s · safety-car chance ${(race.config.safety_car_probability * 100).toFixed(1)}%`;
   }
   function seek(value) {
     position = Math.max(0, Math.min(Number(value), records.length));
